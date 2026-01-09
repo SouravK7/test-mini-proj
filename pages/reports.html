@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | COET Ground Booking</title>
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">🏛️</div><span>Ground Booking</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span>Dashboard</a>
+                    <a href="resources.html" class="nav-item"><span class="nav-item-icon">🏟️</span>Resources</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Admin</div>
+                    <a href="approvals.html" class="nav-item"><span class="nav-item-icon">✓</span>Approvals</a>
+                    <a href="reports.html" class="nav-item active"><span class="nav-item-icon">📈</span>Reports</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon">🚪</span>Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="btn btn-ghost mobile-menu-btn">☰</button>
+                    <h1 class="navbar-title">Reports</h1>
+                </div>
+                <div class="navbar-right">
+                    <button class="btn btn-secondary btn-sm">📥 Export CSV</button>
+                    <div class="navbar-user">
+                        <div class="navbar-user-info">
+                            <div class="navbar-user-name">-</div>
+                            <div class="navbar-user-role">Admin</div>
+                        </div>
+                        <div class="avatar">--</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2 class="page-title">Booking Reports</h2>
+                    <p class="page-subtitle">View resource usage history and analytics</p>
+                </div>
+
+                <!-- Filters -->
+                <div class="card mb-6">
+                    <div class="card-body flex gap-4 flex-wrap">
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">From Date</label>
+                            <input type="date" class="form-input" id="date-from">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">To Date</label>
+                            <input type="date" class="form-input" id="date-to">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="report-status">
+                                <option value="">All</option>
+                                <option value="approved">Approved</option>
+                                <option value="completed">Completed</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button class="btn btn-primary" onclick="App.loadReportsData()">Apply Filter</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">All Bookings</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-container" style="border: none;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Resource</th>
+                                        <th>User</th>
+                                        <th>Date</th>
+                                        <th>Time Slot</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reports-table-body">
+                                    <tr>
+                                        <td colspan="6" class="text-center p-6">
+                                            <div class="spinner mx-auto"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/validators.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+</body>
+
+</html>

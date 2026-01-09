@@ -1,0 +1,134 @@
+/* =============================================
+   COLLEGE RESOURCE BOOKING SYSTEM
+   Design Tokens & CSS Variables
+   ============================================= */
+
+:root {
+  /* Primary Colors - Academic Blue */
+  --color-primary: #1e40af;
+  --color-primary-light: #3b82f6;
+  --color-primary-dark: #1e3a8a;
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+
+  /* Neutral Colors */
+  --color-gray-50: #f8fafc;
+  --color-gray-100: #f1f5f9;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
+  --color-gray-400: #94a3b8;
+  --color-gray-500: #64748b;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
+  --color-gray-900: #0f172a;
+
+  /* Semantic Colors */
+  --color-success: #059669;
+  --color-success-light: #10b981;
+  --color-success-bg: #ecfdf5;
+  --color-warning: #d97706;
+  --color-warning-light: #f59e0b;
+  --color-warning-bg: #fffbeb;
+  --color-error: #dc2626;
+  --color-error-light: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-info: #0284c7;
+  --color-info-light: #0ea5e9;
+  --color-info-bg: #f0f9ff;
+
+  /* Status Colors */
+  --status-pending: #f59e0b;
+  --status-pending-bg: #fef3c7;
+  --status-approved: #10b981;
+  --status-approved-bg: #d1fae5;
+  --status-rejected: #ef4444;
+  --status-rejected-bg: #fee2e2;
+  --status-completed: #6366f1;
+  --status-completed-bg: #e0e7ff;
+
+  /* Background Colors */
+  --bg-body: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-sidebar: #1e293b;
+  --bg-hover: #f8fafc;
+
+  /* Text Colors */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+  --text-link: #1e40af;
+
+  /* Border Colors */
+  --border-default: #e2e8f0;
+  --border-focus: #3b82f6;
+  --border-error: #ef4444;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Spacing */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 70px;
+  --navbar-height: 64px;
+  --content-max-width: 1400px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  /* Z-index Layers */
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-modal-backdrop: 1900;
+  --z-modal: 2000;
+  --z-notification: 3000;
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Can be extended for dark mode */
+  }
+}

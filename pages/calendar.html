@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar | COET Ground Booking</title>
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">🏛️</div><span>Ground Booking</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span>Dashboard</a>
+                    <a href="resources.html" class="nav-item"><span class="nav-item-icon">🏟️</span>Resources</a>
+                    <a href="calendar.html" class="nav-item active"><span class="nav-item-icon">📅</span>Calendar</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Bookings</div>
+                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon">➕</span>New Booking</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
+                        class="nav-item-icon">🚪</span>Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="btn btn-ghost mobile-menu-btn">☰</button>
+                    <h1 class="navbar-title">Calendar</h1>
+                </div>
+                <div class="navbar-right">
+                    <div class="navbar-user">
+                        <div class="navbar-user-info">
+                            <div class="navbar-user-name">-</div>
+                            <div class="navbar-user-role">-</div>
+                        </div>
+                        <div class="avatar">--</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2 class="page-title">Playground Availability</h2>
+                    <p class="page-subtitle">View and book available time slots across all resources</p>
+                </div>
+
+                <!-- Resource Selection -->
+                <div class="card mb-6">
+                    <div class="card-body flex gap-4 items-end flex-wrap">
+                        <div class="form-group" style="margin: 0; flex: 1; min-width: 200px;">
+                            <label class="form-label">Select Playground</label>
+                            <select id="resource-select" class="form-select">
+                                <option value="">All Playgrounds</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Select Date</label>
+                            <input type="date" id="date-select" class="form-input">
+                        </div>
+                        <button class="btn btn-primary" onclick="loadAvailability()">Check Availability</button>
+                    </div>
+                </div>
+
+                <!-- Resources Grid -->
+                <div id="resources-container" class="resource-grid">
+                    <div class="text-center p-6" style="grid-column: 1/-1;">
+                        <div class="spinner spinner-lg mx-auto"></div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="card mt-6">
+                    <div class="card-body flex gap-6 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <div class="time-slot slot-available" style="padding: 4px 12px;">Available</div>
+                            <span class="text-sm text-secondary">Click to book</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="time-slot slot-unavailable" style="padding: 4px 12px;">Booked</div>
+                            <span class="text-sm text-secondary">Already reserved</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/validators.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        // Set default date
+        document.getElementById('date-select').value = Utils.getToday();
+        document.getElementById('date-select').min = Utils.getToday();
+
+        // Load resources dropdown
+        async function init() {
+            const select = document.getElementById('resource-select');
+            MockData.resources.forEach(r => {
+                if (r.status === 'available') {
+                    const option = document.createElement('option');
+                    option.value = r.id;
+                    option.textContent = r.name;
+                    select.appendChild(option);
+                }
+            });
+            loadAvailability();
+        }
+
+        async function loadAvailability() {
+            const container = document.getElementById('resources-container');
+            const date = document.getElementById('date-select').value;
+            const resourceId = document.getElementById('resource-select').value;
+
+            let resources = MockData.resources.filter(r => r.status === 'available');
+            if (resourceId) {
+                resources = resources.filter(r => r.id == resourceId);
+            }
+
+            container.innerHTML = resources.map(resource => {
+                // Get booked slots for this resource on this date
+                const bookedSlots = MockData.bookings
+                    .filter(b => b.resourceId === resource.id && b.date === date && ['pending', 'approved'].includes(b.status))
+                    .map(b => b.slotId);
+
+                const slotsHtml = MockData.timeSlots.map(slot => {
+                    const isBooked = bookedSlots.includes(slot.id);
+                    if (isBooked) {
+                        return `<div class="time-slot slot-unavailable">${slot.label}</div>`;
+                    } else {
+                        return `<div class="time-slot slot-available" style="cursor:pointer;" onclick="bookSlot(${resource.id}, '${date}', ${slot.id})">${slot.label}</div>`;
+                    }
+                }).join('');
+
+                return `
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">${resource.name}</h3>
+              <p class="text-sm text-secondary">📍 ${resource.location} • 👥 Capacity: ${resource.capacity}</p>
+            </div>
+            <div class="card-body">
+              <p class="text-sm mb-4">Slots for ${Utils.formatDate(date)}:</p>
+              <div class="slot-grid" style="grid-template-columns: repeat(2, 1fr);">
+                ${slotsHtml}
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="booking-form.html?resource=${resource.id}&date=${date}" class="btn btn-primary btn-sm">➕ New Booking</a>
+            </div>
+          </div>
+        `;
+            }).join('');
+
+            if (resources.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">🏟️</div>
+                        <div class="empty-state-title">No resources found</div>
+                        <div class="empty-state-description">No playgrounds match your selection.</div>
+                    </div>
+                `;
+            }
+        }
+
+        function bookSlot(resourceId, date, slotId) {
+            window.location.href = `booking-form.html?resource=${resourceId}&date=${date}&slot=${slotId}`;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

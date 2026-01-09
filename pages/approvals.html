@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals | COET Ground Booking</title>
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">🏛️</div><span>Ground Booking</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span>Dashboard</a>
+                    <a href="resources.html" class="nav-item"><span class="nav-item-icon">🏟️</span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon">📅</span>Calendar</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Bookings</div>
+                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon">➕</span>New Booking</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Admin</div>
+                    <a href="approvals.html" class="nav-item active"><span class="nav-item-icon">✓</span>Approvals</a>
+                    <a href="reports.html" class="nav-item"><span class="nav-item-icon">📈</span>Reports</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon">🚪</span>Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="btn btn-ghost mobile-menu-btn">☰</button>
+                    <h1 class="navbar-title">Pending Approvals</h1>
+                </div>
+                <div class="navbar-right">
+                    <div class="navbar-user">
+                        <div class="navbar-user-info">
+                            <div class="navbar-user-name">-</div>
+                            <div class="navbar-user-role">Admin</div>
+                        </div>
+                        <div class="avatar">--</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2 class="page-title">Booking Approval Queue</h2>
+                    <p class="page-subtitle">Review and approve/reject pending booking requests</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-container" style="border: none;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Requestor</th>
+                                        <th>Resource</th>
+                                        <th>Date</th>
+                                        <th>Time Slot</th>
+                                        <th>Purpose</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approvals-table-body">
+                                    <tr>
+                                        <td colspan="7" class="text-center p-6">
+                                            <div class="spinner mx-auto"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/validators.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+</body>
+
+</html>

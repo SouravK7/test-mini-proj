@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | COET Ground Booking</title>
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-logo">🏛️</div>
+                    <h1 class="login-title">Create Account</h1>
+                    <p class="login-subtitle">Register to book college resources</p>
+                </div>
+
+                <div class="login-body">
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label class="form-label required" for="name">Full Name</label>
+                            <input type="text" id="name" class="form-input" placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required" for="email">Email Address</label>
+                            <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Phone Number</label>
+                            <input type="tel" id="phone" class="form-input" placeholder="10-digit phone number">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required" for="password">Password</label>
+                            <input type="password" id="password" class="form-input" placeholder="Minimum 6 characters"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required" for="confirm-password">Confirm Password</label>
+                            <input type="password" id="confirm-password" class="form-input"
+                                placeholder="Re-enter password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-full" id="register-btn">
+                            Create Account
+                        </button>
+                    </form>
+                </div>
+
+                <div class="login-footer">
+                    Already have an account? <a href="../index.html">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/validators.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const btn = document.getElementById('register-btn');
+
+            if (!Validators.required(name)) {
+                Notifications.error('Error', 'Name is required');
+                return;
+            }
+
+            if (!Validators.email(email)) {
+                Notifications.error('Error', 'Please enter a valid email');
+                return;
+            }
+
+            if (!Validators.password(password)) {
+                Notifications.error('Error', 'Password must be at least 6 characters');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                Notifications.error('Error', 'Passwords do not match');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Creating account...';
+
+            const result = await AUTH.register({ name, email, phone, password });
+
+            btn.disabled = false;
+            btn.textContent = 'Create Account';
+
+            if (result.success) {
+                Notifications.success('Success', 'Account created! Redirecting...');
+                setTimeout(() => window.location.href = 'dashboard.html', 1000);
+            } else {
+                Notifications.error('Error', result.error);
+            }
+        });
+    </script>
+</body>
+
+</html>

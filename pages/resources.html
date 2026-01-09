@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources | COET Ground Booking</title>
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/pages.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">🏛️</div>
+                    <span>Ground Booking</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span>Dashboard</a>
+                    <a href="resources.html" class="nav-item active"><span class="nav-item-icon">🏟️</span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon">📅</span>Calendar</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Bookings</div>
+                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon">➕</span>New Booking</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
+                </div>
+                <div class="nav-section" id="faculty-nav">
+                    <div class="nav-section-title">Faculty</div>
+                    <a href="usage-upload.html" class="nav-item"><span class="nav-item-icon">📤</span>Upload Usage</a>
+                </div>
+                <div class="nav-section" id="admin-nav">
+                    <div class="nav-section-title">Admin</div>
+                    <a href="approvals.html" class="nav-item"><span class="nav-item-icon">✓</span>Approvals</a>
+                    <a href="reports.html" class="nav-item"><span class="nav-item-icon">📈</span>Reports</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon">🚪</span>Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="btn btn-ghost mobile-menu-btn">☰</button>
+                    <h1 class="navbar-title">Resources</h1>
+                </div>
+                <div class="navbar-right">
+                    <div class="navbar-user">
+                        <div class="navbar-user-info">
+                            <div class="navbar-user-name">-</div>
+                            <div class="navbar-user-role">-</div>
+                        </div>
+                        <div class="avatar">--</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h2 class="page-title">Available Playgrounds</h2>
+                    <p class="page-subtitle">Browse and book college sports facilities</p>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-bar">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" class="form-input search-input"
+                            placeholder="Search resources...">
+                    </div>
+                    <select id="type-filter" class="form-select" style="width: auto;">
+                        <option value="">All Types</option>
+                        <option value="cricket">Cricket</option>
+                        <option value="football">Football</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="tennis">Tennis</option>
+                        <option value="athletics">Athletics</option>
+                    </select>
+                    <select id="status-filter" class="form-select" style="width: auto;">
+                        <option value="">All Status</option>
+                        <option value="available">Available</option>
+                        <option value="maintenance">Under Maintenance</option>
+                    </select>
+                </div>
+
+                <!-- Resources Grid -->
+                <div class="resource-grid" id="resources-grid">
+                    <div class="text-center p-6" style="grid-column: 1/-1;">
+                        <div class="spinner spinner-lg mx-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/validators.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+</body>
+
+</html>

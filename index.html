@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="College Resource Booking System - Login">
+  <title>Login | COET Ground Booking</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+
+<body>
+  <div class="login-page">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo">🏛️</div>
+          <h1 class="login-title">Ground Booking</h1>
+          <p class="login-subtitle">Sign in to manage playground bookings</p>
+        </div>
+
+        <div class="login-body">
+          <form id="login-form">
+            <div class="form-group">
+              <label class="form-label required" for="email">Email Address</label>
+              <input type="email" id="email" name="email" class="form-input" placeholder="your@email.edu" required>
+              <span class="form-error">Please enter a valid email</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label required" for="password">Password</label>
+              <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password"
+                required>
+              <span class="form-error">Password is required</span>
+            </div>
+
+            <div class="form-group">
+              <div class="form-check">
+                <input type="checkbox" id="remember" class="form-check-input">
+                <label for="remember" class="form-check-label">Remember me</label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-full" id="login-btn">
+              Sign In
+            </button>
+          </form>
+
+          <!-- Demo Credentials -->
+          <div
+            style="margin-top: var(--space-6); padding: var(--space-4); background: var(--color-gray-50); border-radius: var(--radius-md);">
+            <p class="text-sm font-semibold mb-2">Demo Credentials:</p>
+            <div class="text-xs text-secondary">
+              <p><strong>Admin:</strong> admin@coet.edu / admin123</p>
+              <p><strong>Faculty:</strong> faculty@coet.edu / faculty123</p>
+              <p><strong>User:</strong> user@coet.edu / user123</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-footer">
+          <a href="pages/forgot-password.html">Forgot your password?</a>
+          <span style="margin: 0 var(--space-2);">•</span>
+          <a href="pages/register.html">Create account</a>
+          <span style="margin: 0 var(--space-2);">•</span>
+          <a href="public/public-calendar.html">View Public Calendar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/validators.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('login-btn');
+
+      // Validate
+      if (!Validators.email(email)) {
+        Notifications.error('Invalid Email', 'Please enter a valid email address');
+        return;
+      }
+
+      if (!Validators.required(password)) {
+        Notifications.error('Password Required', 'Please enter your password');
+        return;
+      }
+
+      // Disable button
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Signing in...';
+
+      // Attempt login
+      const result = await AUTH.login(email, password);
+
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+
+      if (result.success) {
+        Notifications.success('Welcome!', `Logged in as ${result.data.name}`);
+        setTimeout(() => {
+          window.location.href = 'pages/dashboard.html';
+        }, 1000);
+      } else {
+        Notifications.error('Login Failed', result.error);
+      }
+    });
+
+    // If already logged in, redirect
+    if (AUTH.isAuthenticated()) {
+      window.location.href = 'pages/dashboard.html';
+    }
+  </script>
+</body>
+
+</html>
