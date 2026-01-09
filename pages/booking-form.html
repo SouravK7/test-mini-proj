@@ -9,6 +9,126 @@
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/pages.css">
+    <style>
+        .resource-preview {
+            display: none;
+            padding: var(--space-4);
+            background: var(--color-primary-50);
+            border-radius: var(--radius-md);
+            margin-top: var(--space-3);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .resource-preview.active {
+            display: block;
+        }
+
+        .resource-preview h4 {
+            margin-bottom: var(--space-2);
+            color: var(--color-primary);
+        }
+
+        .resource-preview .meta {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .slot-grid-booking {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-3);
+        }
+
+        @media (max-width: 600px) {
+            .slot-grid-booking {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .slot-option {
+            padding: var(--space-3);
+            border: 2px solid var(--border-default);
+            border-radius: var(--radius-md);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .slot-option:hover:not(.disabled) {
+            border-color: var(--color-primary);
+            background: var(--color-primary-50);
+        }
+
+        .slot-option.selected {
+            border-color: var(--color-primary);
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .slot-option.disabled {
+            background: var(--color-gray-100);
+            color: var(--text-disabled);
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .slot-option .slot-time {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .slot-option .slot-status {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .custom-time-section {
+            margin-top: var(--space-4);
+            padding: var(--space-4);
+            background: var(--color-gray-50);
+            border-radius: var(--radius-md);
+            border: 2px dashed var(--border-default);
+        }
+
+        .custom-time-section.active {
+            border-color: var(--color-primary);
+            background: var(--color-primary-50);
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: var(--space-4);
+            margin-top: var(--space-3);
+        }
+
+        .time-inputs .form-group {
+            flex: 1;
+            margin: 0;
+        }
+
+        .date-picker-wrapper {
+            display: flex;
+            gap: var(--space-3);
+            align-items: center;
+        }
+
+        .date-picker-wrapper input[type="date"] {
+            flex: 1;
+        }
+
+        .date-quick-btns {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .date-quick-btns button {
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
 <body>
@@ -34,7 +154,8 @@
                 </div>
             </nav>
             <div class="sidebar-footer">
-                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon">🚪</span>Logout</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
+                        class="nav-item-icon">🚪</span>Logout</a>
             </div>
         </aside>
 
@@ -56,49 +177,134 @@
             </header>
 
             <div class="page-content">
-                <div class="card" style="max-width: 700px;">
-                    <div class="card-header">
-                        <h3 class="card-title">Booking Details</h3>
-                        <p class="card-subtitle">Fill in the details to request a booking</p>
-                    </div>
-                    <div class="card-body">
-                        <form id="booking-form">
-                            <div class="form-group">
-                                <label class="form-label required" for="resource-select">Select Resource</label>
+                <form id="booking-form">
+                    <!-- Step 1: Select Resource -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">📍 Step 1: Select Resource</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label required" for="resource-select">Choose a Playground</label>
                                 <select id="resource-select" name="resource-select" class="form-select" required>
-                                    <option value="">Loading resources...</option>
+                                    <option value="">-- Select a playground --</option>
                                 </select>
-                                <span class="form-error">Please select a resource</span>
                             </div>
-
-                            <div class="form-group">
-                                <label class="form-label required" for="booking-date">Select Date</label>
-                                <input type="date" id="booking-date" name="booking-date" class="form-input" required>
-                                <span class="form-error">Please select a future date</span>
+                            <div id="resource-preview" class="resource-preview">
+                                <h4 id="preview-name">Resource Name</h4>
+                                <div class="meta">
+                                    <span id="preview-location">📍 Location</span>
+                                    <span id="preview-capacity">👥 Capacity</span>
+                                    <span id="preview-status">✓ Available</span>
+                                </div>
+                                <p id="preview-description" class="text-sm mt-3" style="color: var(--text-secondary);">
+                                </p>
                             </div>
+                        </div>
+                    </div>
 
-                            <div id="slot-container" class="form-group">
-                                <p class="text-sm text-secondary">Select a resource and date to view available slots</p>
+                    <!-- Step 2: Select Date -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">📅 Step 2: Select Date</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label required" for="booking-date">Booking Date</label>
+                                <div class="date-picker-wrapper">
+                                    <input type="date" id="booking-date" name="booking-date" class="form-input"
+                                        required>
+                                    <div class="date-quick-btns">
+                                        <button type="button" class="btn btn-ghost btn-sm"
+                                            onclick="setDate(0)">Today</button>
+                                        <button type="button" class="btn btn-ghost btn-sm"
+                                            onclick="setDate(1)">Tomorrow</button>
+                                        <button type="button" class="btn btn-ghost btn-sm" onclick="setDate(7)">Next
+                                            Week</button>
+                                    </div>
+                                </div>
+                                <p class="form-hint">Select the date you want to book the resource</p>
                             </div>
+                        </div>
+                    </div>
 
+                    <!-- Step 3: Select Time Slot -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">⏰ Step 3: Select Time Slot</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-sm text-secondary mb-4" id="slot-instruction">Select a resource and date
+                                first to see available slots</p>
+
+                            <div id="slots-container" style="display: none;">
+                                <label class="form-label required">Available Time Slots</label>
+                                <p class="text-sm text-secondary mb-3">Click to select one or more consecutive slots</p>
+                                <div id="slot-grid" class="slot-grid-booking"></div>
+                                <input type="hidden" id="selected-slots" name="selected-slots">
+
+                                <!-- Custom Time Option -->
+                                <div class="custom-time-section" id="custom-time-section">
+                                    <div class="flex items-center gap-3">
+                                        <input type="checkbox" id="use-custom-time" class="form-check-input">
+                                        <label for="use-custom-time" class="form-check-label font-semibold">
+                                            🕐 Need a custom time slot?
+                                        </label>
+                                    </div>
+                                    <p class="text-sm text-secondary mt-2">If the preset slots don't work for you,
+                                        specify your preferred time below.</p>
+                                    <div class="time-inputs" id="custom-time-inputs" style="display: none;">
+                                        <div class="form-group">
+                                            <label class="form-label">Start Time</label>
+                                            <input type="time" id="custom-start" class="form-input" min="06:00"
+                                                max="20:00">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">End Time</label>
+                                            <input type="time" id="custom-end" class="form-input" min="06:00"
+                                                max="20:00">
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-secondary mt-2" id="custom-time-note" style="display: none;">
+                                        ⚠️ Custom time requests require special approval and may take longer to process.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Purpose -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">📝 Step 4: Booking Details</h3>
+                        </div>
+                        <div class="card-body">
                             <div class="form-group">
                                 <label class="form-label required" for="purpose">Purpose of Booking</label>
                                 <textarea id="purpose" name="purpose" class="form-textarea" rows="4"
                                     placeholder="Describe the purpose of your booking (e.g., Cricket practice for inter-college tournament, Community event, etc.)"
                                     required></textarea>
-                                <span class="form-error">Please provide more details (minimum 10 characters)</span>
-                                <p class="form-hint">Provide enough detail to help admins understand your request</p>
+                                <p class="form-hint">Provide enough detail to help admins understand your request
+                                    (minimum 10 characters)</p>
                             </div>
 
-                            <div class="flex gap-3 mt-6">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    Submit Booking Request
-                                </button>
-                                <a href="dashboard.html" class="btn btn-secondary btn-lg">Cancel</a>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="expected-attendees">Expected Number of Attendees</label>
+                                <input type="number" id="expected-attendees" class="form-input" placeholder="e.g., 25"
+                                    min="1" max="500">
+                                <p class="form-hint">Optional - helps us prepare the facility</p>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Submit -->
+                    <div class="flex gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                            ✓ Submit Booking Request
+                        </button>
+                        <a href="calendar.html" class="btn btn-secondary btn-lg">Cancel</a>
+                    </div>
+                </form>
             </div>
         </main>
     </div>
@@ -111,9 +317,230 @@
     <script src="../js/api.js"></script>
     <script src="../js/app.js"></script>
     <script>
-        // Set min date to today
+        let selectedSlots = [];
+        let currentResource = null;
+
+        // Initialize
         const dateInput = document.getElementById('booking-date');
         dateInput.min = Utils.getToday();
+        dateInput.value = Utils.getToday();
+
+        // Load resources
+        const resourceSelect = document.getElementById('resource-select');
+        MockData.resources.filter(r => r.status === 'available').forEach(r => {
+            const option = document.createElement('option');
+            option.value = r.id;
+            option.textContent = r.name;
+            resourceSelect.appendChild(option);
+        });
+
+        // URL params pre-fill
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('resource')) {
+            resourceSelect.value = urlParams.get('resource');
+            showResourcePreview(urlParams.get('resource'));
+        }
+        if (urlParams.get('date')) {
+            dateInput.value = urlParams.get('date');
+        }
+
+        // Resource selection change
+        resourceSelect.addEventListener('change', function () {
+            showResourcePreview(this.value);
+            loadSlots();
+        });
+
+        // Date change
+        dateInput.addEventListener('change', loadSlots);
+
+        // Custom time toggle
+        document.getElementById('use-custom-time').addEventListener('change', function () {
+            const inputs = document.getElementById('custom-time-inputs');
+            const note = document.getElementById('custom-time-note');
+            const section = document.getElementById('custom-time-section');
+
+            if (this.checked) {
+                inputs.style.display = 'flex';
+                note.style.display = 'block';
+                section.classList.add('active');
+                // Clear selected preset slots
+                selectedSlots = [];
+                document.querySelectorAll('.slot-option.selected').forEach(el => el.classList.remove('selected'));
+            } else {
+                inputs.style.display = 'none';
+                note.style.display = 'none';
+                section.classList.remove('active');
+            }
+        });
+
+        function showResourcePreview(resourceId) {
+            const preview = document.getElementById('resource-preview');
+            if (!resourceId) {
+                preview.classList.remove('active');
+                currentResource = null;
+                return;
+            }
+
+            currentResource = MockData.resources.find(r => r.id == resourceId);
+            if (currentResource) {
+                document.getElementById('preview-name').textContent = currentResource.name;
+                document.getElementById('preview-location').textContent = '📍 ' + currentResource.location;
+                document.getElementById('preview-capacity').textContent = '👥 Capacity: ' + currentResource.capacity;
+                document.getElementById('preview-status').textContent = '✓ ' + Utils.capitalize(currentResource.status);
+                document.getElementById('preview-description').textContent = currentResource.description;
+                preview.classList.add('active');
+            }
+        }
+
+        function setDate(daysFromToday) {
+            const date = new Date();
+            date.setDate(date.getDate() + daysFromToday);
+            dateInput.value = date.toISOString().split('T')[0];
+            loadSlots();
+        }
+
+        function loadSlots() {
+            const resourceId = resourceSelect.value;
+            const date = dateInput.value;
+            const container = document.getElementById('slots-container');
+            const grid = document.getElementById('slot-grid');
+            const instruction = document.getElementById('slot-instruction');
+
+            if (!resourceId || !date) {
+                container.style.display = 'none';
+                instruction.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'block';
+            instruction.style.display = 'none';
+
+            // Get booked slots
+            const bookedSlots = MockData.bookings
+                .filter(b => b.resourceId == resourceId && b.date === date && ['pending', 'approved'].includes(b.status))
+                .map(b => b.slotId);
+
+            // Render slots
+            grid.innerHTML = MockData.timeSlots.map(slot => {
+                const isBooked = bookedSlots.includes(slot.id);
+                const isSelected = selectedSlots.includes(slot.id);
+                return `
+                    <div class="slot-option ${isBooked ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
+                         data-slot-id="${slot.id}" 
+                         data-available="${!isBooked}"
+                         onclick="${isBooked ? '' : 'toggleSlot(' + slot.id + ', this)'}">
+                        <div class="slot-time">${slot.label}</div>
+                        <div class="slot-status">${isBooked ? '❌ Booked' : '✓ Available'}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Pre-select slot from URL
+            const preSlot = urlParams.get('slot');
+            if (preSlot && !bookedSlots.includes(parseInt(preSlot))) {
+                toggleSlot(parseInt(preSlot), document.querySelector(`[data-slot-id="${preSlot}"]`));
+            }
+        }
+
+        function toggleSlot(slotId, element) {
+            // Uncheck custom time if selecting preset
+            document.getElementById('use-custom-time').checked = false;
+            document.getElementById('custom-time-inputs').style.display = 'none';
+            document.getElementById('custom-time-note').style.display = 'none';
+            document.getElementById('custom-time-section').classList.remove('active');
+
+            const index = selectedSlots.indexOf(slotId);
+            if (index > -1) {
+                selectedSlots.splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                selectedSlots.push(slotId);
+                element.classList.add('selected');
+            }
+            document.getElementById('selected-slots').value = selectedSlots.join(',');
+        }
+
+        // Form submit
+        document.getElementById('booking-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const useCustom = document.getElementById('use-custom-time').checked;
+            const customStart = document.getElementById('custom-start').value;
+            const customEnd = document.getElementById('custom-end').value;
+
+            // Validation
+            if (!resourceSelect.value) {
+                Notifications.error('Error', 'Please select a resource');
+                return;
+            }
+            if (!dateInput.value) {
+                Notifications.error('Error', 'Please select a date');
+                return;
+            }
+            if (!useCustom && selectedSlots.length === 0) {
+                Notifications.error('Error', 'Please select at least one time slot');
+                return;
+            }
+            if (useCustom && (!customStart || !customEnd)) {
+                Notifications.error('Error', 'Please specify custom start and end times');
+                return;
+            }
+            if (useCustom && customStart >= customEnd) {
+                Notifications.error('Error', 'End time must be after start time');
+                return;
+            }
+
+            const purpose = document.getElementById('purpose').value;
+            if (!purpose || purpose.length < 10) {
+                Notifications.error('Error', 'Please provide more details about your booking purpose');
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const user = AUTH.getCurrentUser();
+            const bookingData = {
+                resourceId: parseInt(resourceSelect.value),
+                date: dateInput.value,
+                slotIds: useCustom ? [] : selectedSlots,
+                customTime: useCustom ? { start: customStart, end: customEnd } : null,
+                purpose: purpose,
+                attendees: document.getElementById('expected-attendees').value || null,
+                userId: user?.id
+            };
+
+            // Add to mock data
+            const newBooking = {
+                id: MockData.bookings.length + 1,
+                resourceId: bookingData.resourceId,
+                userId: bookingData.userId,
+                date: bookingData.date,
+                slotId: bookingData.slotIds[0] || null,
+                customTime: bookingData.customTime,
+                purpose: bookingData.purpose,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+            MockData.bookings.push(newBooking);
+
+            btn.disabled = false;
+            btn.textContent = '✓ Submit Booking Request';
+
+            Notifications.success('Success!', 'Your booking request has been submitted for approval.');
+            setTimeout(() => {
+                window.location.href = 'my-bookings.html';
+            }, 1500);
+        });
+
+        // Initial load
+        if (resourceSelect.value && dateInput.value) {
+            loadSlots();
+        }
     </script>
 </body>
 
