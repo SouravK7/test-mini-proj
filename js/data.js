@@ -15,68 +15,29 @@ const MockData = {
   resources: [
     {
       id: 1,
-      name: 'Main Cricket Ground',
+      name: 'Main Ground',
       type: 'playground',
-      subType: 'cricket',
+      subType: 'multi-purpose',
       capacity: 200,
-      location: 'North Campus',
-      amenities: ['Pavilion', 'Changing Rooms', 'Floodlights', 'Scoreboard'],
+      location: 'Main Campus',
+      amenities: ['Pavilion', 'Changing Rooms', 'Floodlights', 'Goal Posts', 'Cricket Pitch'],
       image: null,
-      description: 'Full-size cricket ground with professional pitch and boundary. Suitable for matches and practice sessions.',
+      description: 'Multi-purpose ground suitable for football, cricket, and other outdoor sports. Full-size field with professional facilities.',
       status: 'available',
       rules: ['No metal spikes allowed', 'Prior booking required for floodlight use', 'Maximum 3-hour slots']
     },
     {
       id: 2,
-      name: 'Football Field',
+      name: 'Volleyball Court',
       type: 'playground',
-      subType: 'football',
-      capacity: 150,
-      location: 'South Campus',
-      amenities: ['Goal Posts', 'Changing Rooms', 'First Aid'],
-      image: null,
-      description: 'Standard football field with natural grass. Suitable for matches and training.',
-      status: 'available',
-      rules: ['Football boots only', 'No food/drinks on field']
-    },
-    {
-      id: 3,
-      name: 'Basketball Court',
-      type: 'playground',
-      subType: 'basketball',
-      capacity: 50,
+      subType: 'volleyball',
+      capacity: 30,
       location: 'Sports Complex',
-      amenities: ['Indoor Court', 'Seating Gallery', 'Water Cooler'],
+      amenities: ['Net', 'Sand Court', 'Seating Area', 'First Aid'],
       image: null,
-      description: 'Indoor basketball court with wooden flooring and proper markings.',
+      description: 'Standard volleyball court with proper markings. Suitable for matches and practice sessions.',
       status: 'available',
-      rules: ['Indoor shoes only', 'Maximum 20 players at a time']
-    },
-    {
-      id: 4,
-      name: 'Tennis Courts',
-      type: 'playground',
-      subType: 'tennis',
-      capacity: 20,
-      location: 'East Block',
-      amenities: ['2 Courts', 'Net Posts', 'Seating'],
-      image: null,
-      description: 'Two synthetic tennis courts available for singles and doubles matches.',
-      status: 'maintenance',
-      rules: ['Tennis shoes mandatory', 'Equipment not provided']
-    },
-    {
-      id: 5,
-      name: 'Athletics Track',
-      type: 'playground',
-      subType: 'athletics',
-      capacity: 100,
-      location: 'Main Stadium',
-      amenities: ['400m Track', 'Long Jump Pit', 'Shot Put Area'],
-      image: null,
-      description: '400-meter synthetic running track with multiple lanes and field event facilities.',
-      status: 'available',
-      rules: ['Spikes allowed on track only', 'No cycling']
+      rules: ['Sports shoes mandatory', 'Maximum 12 players at a time', 'No food/drinks on court']
     }
   ],
 
@@ -106,7 +67,7 @@ const MockData = {
     },
     {
       id: 2,
-      resourceId: 2,
+      resourceId: 1,
       userId: 3,
       date: '2026-01-12',
       slotId: 5,
@@ -116,11 +77,11 @@ const MockData = {
     },
     {
       id: 3,
-      resourceId: 3,
+      resourceId: 2,
       userId: 4,
       date: '2026-01-08',
       slotId: 4,
-      purpose: 'Community basketball tournament',
+      purpose: 'Volleyball tournament practice',
       status: 'approved',
       createdAt: '2026-01-03T16:45:00',
       approvedBy: 1,
@@ -138,11 +99,11 @@ const MockData = {
     },
     {
       id: 5,
-      resourceId: 5,
+      resourceId: 1,
       userId: 3,
       date: '2026-01-05',
       slotId: 1,
-      purpose: 'Morning running practice',
+      purpose: 'Morning fitness session',
       status: 'completed',
       createdAt: '2026-01-01T08:00:00',
       approvedBy: 1,
@@ -154,12 +115,12 @@ const MockData = {
       userId: 4,
       date: '2026-01-06',
       slotId: 5,
-      purpose: 'Weekend football friendly',
+      purpose: 'Weekend volleyball friendly',
       status: 'rejected',
       createdAt: '2026-01-04T15:30:00',
       rejectedBy: 1,
       rejectedAt: '2026-01-05T09:00:00',
-      rejectionReason: 'Ground under maintenance on that day'
+      rejectionReason: 'Court under maintenance on that day'
     }
   ],
 
@@ -170,7 +131,7 @@ const MockData = {
       bookingId: 5,
       uploadedBy: 2,
       uploadedAt: '2026-01-05T09:30:00',
-      remarks: 'Successful morning practice session. Track was in good condition.',
+      remarks: 'Successful morning fitness session. Ground was in good condition.',
       issues: null,
       media: ['photo1.jpg', 'photo2.jpg']
     },
@@ -179,20 +140,20 @@ const MockData = {
       bookingId: 3,
       uploadedBy: 2,
       uploadedAt: '2026-01-08T18:00:00',
-      remarks: 'Community tournament completed. Minor cleanup required.',
-      issues: 'One basketball net needs replacement',
+      remarks: 'Volleyball practice completed. Minor cleanup required.',
+      issues: null,
       media: ['event_photo.jpg', 'event_video.mp4']
     }
   ],
 
   // Stats (for dashboard)
   stats: {
-    totalResources: 5,
+    totalResources: 2,
     bookingsToday: 2,
     pendingApprovals: 2,
     completedThisMonth: 8,
     totalUsers: 45,
-    activeResources: 4
+    activeResources: 2
   }
 };
 

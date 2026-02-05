@@ -33,18 +33,19 @@
                     <a href="booking-form.html" class="nav-item"><span class="nav-item-icon">➕</span>New Booking</a>
                     <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
                 </div>
-                <div class="nav-section" id="faculty-nav">
+                <div class="nav-section" data-role="faculty,admin">
                     <div class="nav-section-title">Faculty</div>
                     <a href="usage-upload.html" class="nav-item"><span class="nav-item-icon">📤</span>Upload Usage</a>
                 </div>
-                <div class="nav-section" id="admin-nav">
+                <div class="nav-section" data-role="admin">
                     <div class="nav-section-title">Admin</div>
                     <a href="approvals.html" class="nav-item"><span class="nav-item-icon">✓</span>Approvals</a>
                     <a href="reports.html" class="nav-item"><span class="nav-item-icon">📈</span>Reports</a>
                 </div>
             </nav>
             <div class="sidebar-footer">
-                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon">🚪</span>Logout</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
+                        class="nav-item-icon">🚪</span>Logout</a>
             </div>
         </aside>
 
@@ -80,11 +81,8 @@
                     </div>
                     <select id="type-filter" class="form-select" style="width: auto;">
                         <option value="">All Types</option>
-                        <option value="cricket">Cricket</option>
-                        <option value="football">Football</option>
-                        <option value="basketball">Basketball</option>
-                        <option value="tennis">Tennis</option>
-                        <option value="athletics">Athletics</option>
+                        <option value="multi-purpose">Main Ground</option>
+                        <option value="volleyball">Volleyball Court</option>
                     </select>
                     <select id="status-filter" class="form-select" style="width: auto;">
                         <option value="">All Status</option>

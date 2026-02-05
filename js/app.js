@@ -46,7 +46,21 @@ const App = {
                 }
             }
         });
+
+        // Also hide nav-sections based on role
+        const navSections = document.querySelectorAll('.nav-section[data-role]');
+        navSections.forEach(section => {
+            const requiredRole = section.dataset.role;
+            if (requiredRole) {
+                const user = AUTH.getCurrentUser();
+                const roles = requiredRole.split(',');
+                if (!user || !roles.includes(user.role)) {
+                    section.style.display = 'none';
+                }
+            }
+        });
     },
+
 
     // Mobile menu toggle
     setupMobileMenu() {
