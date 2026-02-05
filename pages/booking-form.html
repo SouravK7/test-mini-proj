@@ -193,8 +193,6 @@
                             <div id="resource-preview" class="resource-preview">
                                 <h4 id="preview-name">Resource Name</h4>
                                 <div class="meta">
-                                    <span id="preview-location">📍 Location</span>
-                                    <span id="preview-capacity">👥 Capacity</span>
                                     <span id="preview-status">✓ Available</span>
                                 </div>
                                 <p id="preview-description" class="text-sm mt-3" style="color: var(--text-secondary);">
@@ -384,8 +382,6 @@
             currentResource = MockData.resources.find(r => r.id == resourceId);
             if (currentResource) {
                 document.getElementById('preview-name').textContent = currentResource.name;
-                document.getElementById('preview-location').textContent = '📍 ' + currentResource.location;
-                document.getElementById('preview-capacity').textContent = '👥 Capacity: ' + currentResource.capacity;
                 document.getElementById('preview-status').textContent = '✓ ' + Utils.capitalize(currentResource.status);
                 document.getElementById('preview-description').textContent = currentResource.description;
                 preview.classList.add('active');

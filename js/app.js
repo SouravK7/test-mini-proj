@@ -231,10 +231,6 @@ const App = {
         </div>
         <div class="resource-card-body">
           <h3 class="resource-card-title">${r.name}</h3>
-          <div class="resource-card-meta">
-            <span>📍 ${r.location}</span>
-            <span>👥 ${r.capacity}</span>
-          </div>
           <p class="text-sm text-secondary">${Utils.truncate(r.description, 80)}</p>
         </div>
         <div class="resource-card-footer">
