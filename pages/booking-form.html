@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/pages.css">
+    <link rel="stylesheet" href="../css/theme-toggle.css">
+    <script src="../js/theme.js"></script>
     <style>
         .resource-preview {
             display: none;
@@ -152,6 +154,18 @@
                         Booking</a>
                     <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
                 </div>
+                <div class="nav-section" data-role="faculty,admin">
+                    <div class="nav-section-title">Faculty</div>
+                    <a href="usage-upload.html" class="nav-item" data-role="faculty,admin"><span
+                            class="nav-item-icon">📤</span>Upload Usage</a>
+                </div>
+                <div class="nav-section" data-role="admin">
+                    <div class="nav-section-title">Admin</div>
+                    <a href="approvals.html" class="nav-item" data-role="admin"><span
+                            class="nav-item-icon">✓</span>Approvals</a>
+                    <a href="reports.html" class="nav-item" data-role="admin"><span
+                            class="nav-item-icon">📈</span>Reports</a>
+                </div>
             </nav>
             <div class="sidebar-footer">
                 <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
@@ -166,6 +180,8 @@
                     <h1 class="navbar-title">New Booking Request</h1>
                 </div>
                 <div class="navbar-right">
+                    <button class="theme-toggle" aria-label="Toggle theme"><span
+                            class="theme-toggle-knob"></span></button>
                     <div class="navbar-user">
                         <div class="navbar-user-info">
                             <div class="navbar-user-name">-</div>
@@ -323,14 +339,20 @@
         dateInput.min = Utils.getToday();
         dateInput.value = Utils.getToday();
 
-        // Load resources
+        // Load resources from API
         const resourceSelect = document.getElementById('resource-select');
-        MockData.resources.filter(r => r.status === 'available').forEach(r => {
-            const option = document.createElement('option');
-            option.value = r.id;
-            option.textContent = r.name;
-            resourceSelect.appendChild(option);
-        });
+        async function loadResources() {
+            const result = await API.getResources({ status: 'available' });
+            if (result.success) {
+                result.data.forEach(r => {
+                    const option = document.createElement('option');
+                    option.value = r.id;
+                    option.textContent = r.name;
+                    resourceSelect.appendChild(option);
+                });
+            }
+        }
+        loadResources();
 
         // URL params pre-fill
         const urlParams = new URLSearchParams(window.location.search);
@@ -371,7 +393,7 @@
             }
         });
 
-        function showResourcePreview(resourceId) {
+        async function showResourcePreview(resourceId) {
             const preview = document.getElementById('resource-preview');
             if (!resourceId) {
                 preview.classList.remove('active');
@@ -379,8 +401,9 @@
                 return;
             }
 
-            currentResource = MockData.resources.find(r => r.id == resourceId);
-            if (currentResource) {
+            const result = await API.getResourceById(resourceId);
+            if (result.success) {
+                currentResource = result.data;
                 document.getElementById('preview-name').textContent = currentResource.name;
                 document.getElementById('preview-status').textContent = '✓ ' + Utils.capitalize(currentResource.status);
                 document.getElementById('preview-description').textContent = currentResource.description;
@@ -395,7 +418,7 @@
             loadSlots();
         }
 
-        function loadSlots() {
+        async function loadSlots() {
             const resourceId = resourceSelect.value;
             const date = dateInput.value;
             const container = document.getElementById('slots-container');
@@ -411,19 +434,21 @@
             container.style.display = 'block';
             instruction.style.display = 'none';
 
-            // Get booked slots
-            const bookedSlots = MockData.bookings
-                .filter(b => b.resourceId == resourceId && b.date === date && ['pending', 'approved'].includes(b.status))
-                .map(b => b.slotId);
+            // Get availability from API
+            const result = await API.checkAvailability(resourceId, date);
+            if (!result.success) {
+                grid.innerHTML = '<p>Error loading slots</p>';
+                return;
+            }
 
             // Render slots
-            grid.innerHTML = MockData.timeSlots.map(slot => {
-                const isBooked = bookedSlots.includes(slot.id);
+            grid.innerHTML = result.data.map(slot => {
+                const isBooked = !slot.available;
                 const isSelected = selectedSlots.includes(slot.id);
                 return `
                     <div class="slot-option ${isBooked ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
                          data-slot-id="${slot.id}" 
-                         data-available="${!isBooked}"
+                         data-available="${slot.available}"
                          onclick="${isBooked ? '' : 'toggleSlot(' + slot.id + ', this)'}">
                         <div class="slot-time">${slot.label}</div>
                         <div class="slot-status">${isBooked ? '❌ Booked' : '✓ Available'}</div>
@@ -433,8 +458,11 @@
 
             // Pre-select slot from URL
             const preSlot = urlParams.get('slot');
-            if (preSlot && !bookedSlots.includes(parseInt(preSlot))) {
-                toggleSlot(parseInt(preSlot), document.querySelector(`[data-slot-id="${preSlot}"]`));
+            if (preSlot) {
+                const slotElement = document.querySelector(`[data-slot-id="${preSlot}"]`);
+                if (slotElement && slotElement.dataset.available === 'true') {
+                    toggleSlot(parseInt(preSlot), slotElement);
+                }
             }
         }
 
@@ -496,41 +524,27 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span> Submitting...';
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
             const user = AUTH.getCurrentUser();
-            const bookingData = {
-                resourceId: parseInt(resourceSelect.value),
-                date: dateInput.value,
-                slotIds: useCustom ? [] : selectedSlots,
-                customTime: useCustom ? { start: customStart, end: customEnd } : null,
-                purpose: purpose,
-                attendees: document.getElementById('expected-attendees').value || null,
-                userId: user?.id
-            };
 
-            // Add to mock data
-            const newBooking = {
-                id: MockData.bookings.length + 1,
-                resourceId: bookingData.resourceId,
-                userId: bookingData.userId,
-                date: bookingData.date,
-                slotId: bookingData.slotIds[0] || null,
-                customTime: bookingData.customTime,
-                purpose: bookingData.purpose,
-                status: 'pending',
-                createdAt: new Date().toISOString()
-            };
-            MockData.bookings.push(newBooking);
+            // Create booking via API
+            const result = await API.createBooking({
+                resourceId: parseInt(resourceSelect.value),
+                slotId: selectedSlots[0], // Use first selected slot
+                date: dateInput.value,
+                purpose: purpose
+            });
 
             btn.disabled = false;
             btn.textContent = '✓ Submit Booking Request';
 
-            Notifications.success('Success!', 'Your booking request has been submitted for approval.');
-            setTimeout(() => {
-                window.location.href = 'my-bookings.html';
-            }, 1500);
+            if (result.success) {
+                Notifications.success('Success!', 'Your booking request has been submitted for approval.');
+                setTimeout(() => {
+                    window.location.href = 'my-bookings.html';
+                }, 1500);
+            } else {
+                Notifications.error('Error', result.error || 'Failed to submit booking');
+            }
         });
 
         // Initial load

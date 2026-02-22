@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/pages.css">
+    <link rel="stylesheet" href="../css/theme-toggle.css">
+    <script src="../js/theme.js"></script>
 </head>
 
 <body>
@@ -90,6 +92,8 @@
                     <h1 class="navbar-title">Dashboard</h1>
                 </div>
                 <div class="navbar-right">
+                    <button class="theme-toggle" aria-label="Toggle theme"><span
+                            class="theme-toggle-knob"></span></button>
                     <div class="dropdown">
                         <div class="navbar-user" data-dropdown>
                             <div class="navbar-user-info">
@@ -204,23 +208,8 @@
     <script src="../js/auth.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/app.js"></script>
-    <script>
-        // Show/hide admin stats based on role
-        document.addEventListener('DOMContentLoaded', () => {
-            const user = AUTH.getCurrentUser();
-            if (user && user.role !== 'admin') {
-                document.getElementById('stats-section').style.display = 'none';
-            }
 
-            // Hide nav sections based on role
-            document.querySelectorAll('[data-role]').forEach(el => {
-                const roles = el.dataset.role.split(',');
-                if (!user || !roles.includes(user.role)) {
-                    el.style.display = 'none';
-                }
-            });
-        });
-    </script>
+
 </body>
 
 </html>

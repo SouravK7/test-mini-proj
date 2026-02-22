@@ -1,124 +1,135 @@
 /* =============================================
-   COLLEGE RESOURCE BOOKING SYSTEM
-   Design Tokens & CSS Variables
+   COET GROUND BOOKING SYSTEM
+   Liquid Glass — Modern Dark Theme
    ============================================= */
 
 :root {
-  /* Primary Colors - Academic Blue */
-  --color-primary: #1e40af;
-  --color-primary-light: #3b82f6;
-  --color-primary-dark: #1e3a8a;
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
+  /* ---- Accent — Vibrant Teal/Cyan ---- */
+  --color-primary: #00d4aa;
+  --color-primary-light: #33e0bf;
+  --color-primary-dark: #00b894;
+  --color-primary-50: rgba(0, 212, 170, 0.06);
+  --color-primary-100: rgba(0, 212, 170, 0.12);
 
-  /* Neutral Colors */
-  --color-gray-50: #f8fafc;
-  --color-gray-100: #f1f5f9;
-  --color-gray-200: #e2e8f0;
-  --color-gray-300: #cbd5e1;
-  --color-gray-400: #94a3b8;
-  --color-gray-500: #64748b;
-  --color-gray-600: #475569;
-  --color-gray-700: #334155;
-  --color-gray-800: #1e293b;
-  --color-gray-900: #0f172a;
+  /* ---- Surface Palette — Deep cool grays ---- */
+  --color-gray-50: #1a1d23;
+  --color-gray-100: #1e2128;
+  --color-gray-200: #262a33;
+  --color-gray-300: #2f3440;
+  --color-gray-400: #4a5060;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #9ca3af;
+  --color-gray-700: #c0c7d2;
+  --color-gray-800: #e0e4ea;
+  --color-gray-900: #f0f2f5;
 
-  /* Semantic Colors */
-  --color-success: #059669;
-  --color-success-light: #10b981;
-  --color-success-bg: #ecfdf5;
-  --color-warning: #d97706;
-  --color-warning-light: #f59e0b;
-  --color-warning-bg: #fffbeb;
-  --color-error: #dc2626;
-  --color-error-light: #ef4444;
-  --color-error-bg: #fef2f2;
-  --color-info: #0284c7;
-  --color-info-light: #0ea5e9;
-  --color-info-bg: #f0f9ff;
+  /* ---- Semantic ---- */
+  --color-success: #34d399;
+  --color-success-light: #6ee7b7;
+  --color-success-bg: rgba(52, 211, 153, 0.1);
+  --color-warning: #fbbf24;
+  --color-warning-light: #fcd34d;
+  --color-warning-bg: rgba(251, 191, 36, 0.1);
+  --color-error: #f87171;
+  --color-error-light: #fca5a5;
+  --color-error-bg: rgba(248, 113, 113, 0.1);
+  --color-info: #60a5fa;
+  --color-info-light: #93c5fd;
+  --color-info-bg: rgba(96, 165, 250, 0.1);
 
-  /* Status Colors */
-  --status-pending: #f59e0b;
-  --status-pending-bg: #fef3c7;
-  --status-approved: #10b981;
-  --status-approved-bg: #d1fae5;
-  --status-rejected: #ef4444;
-  --status-rejected-bg: #fee2e2;
-  --status-completed: #6366f1;
-  --status-completed-bg: #e0e7ff;
+  /* ---- Status ---- */
+  --status-pending: var(--color-warning);
+  --status-pending-bg: var(--color-warning-bg);
+  --status-approved: var(--color-success);
+  --status-approved-bg: var(--color-success-bg);
+  --status-rejected: var(--color-error);
+  --status-rejected-bg: var(--color-error-bg);
+  --status-completed: #a78bfa;
+  --status-completed-bg: rgba(167, 139, 250, 0.1);
 
-  /* Background Colors */
-  --bg-body: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-sidebar: #1e293b;
-  --bg-hover: #f8fafc;
+  /* ---- Backgrounds ---- */
+  --bg-body: #0e1117;
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-sidebar: rgba(255, 255, 255, 0.03);
+  --bg-hover: rgba(255, 255, 255, 0.06);
 
-  /* Text Colors */
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
-  --text-link: #1e40af;
+  /* ---- Glass Tokens ---- */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-bg-active: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-light: rgba(255, 255, 255, 0.12);
+  --glass-blur: blur(24px);
+  --glass-blur-lg: blur(40px);
 
-  /* Border Colors */
-  --border-default: #e2e8f0;
-  --border-focus: #3b82f6;
-  --border-error: #ef4444;
+  /* ---- Text ---- */
+  --text-primary: #f0f2f5;
+  --text-secondary: rgba(255, 255, 255, 0.55);
+  --text-muted: rgba(255, 255, 255, 0.3);
+  --text-inverse: #0e1117;
+  --text-link: var(--color-primary);
 
-  /* Typography */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 1.875rem;  /* 30px */
+  /* ---- Borders ---- */
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-focus: var(--color-primary);
+  --border-error: var(--color-error);
+
+  /* ---- Typography ---- */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --font-size-xs: 0.6875rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-lg: 1.0625rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.47;
+  --line-height-relaxed: 1.6;
 
-  /* Spacing */
-  --space-1: 0.25rem;   /* 4px */
-  --space-2: 0.5rem;    /* 8px */
-  --space-3: 0.75rem;   /* 12px */
-  --space-4: 1rem;      /* 16px */
-  --space-5: 1.25rem;   /* 20px */
-  --space-6: 1.5rem;    /* 24px */
-  --space-8: 2rem;      /* 32px */
-  --space-10: 2.5rem;   /* 40px */
-  --space-12: 3rem;     /* 48px */
-  --space-16: 4rem;     /* 64px */
+  /* ---- Spacing ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
 
-  /* Layout */
+  /* ---- Layout ---- */
   --sidebar-width: 260px;
   --sidebar-collapsed: 70px;
-  --navbar-height: 64px;
-  --content-max-width: 1400px;
+  --navbar-height: 52px;
+  --content-max-width: 1200px;
 
-  /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* ---- Radius — Generous, flowing ---- */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* ---- Shadows — Glow-style for dark ---- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px rgba(0, 212, 170, 0.08);
+  --shadow-glow-strong: 0 0 50px rgba(0, 212, 170, 0.15);
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
+  /* ---- Transitions ---- */
+  --transition-fast: 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-normal: 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-slow: 500ms cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  /* Z-index Layers */
+  /* ---- Z-index ---- */
   --z-dropdown: 1000;
   --z-sticky: 1100;
   --z-modal-backdrop: 1900;
@@ -126,9 +137,92 @@
   --z-notification: 3000;
 }
 
-/* Dark mode support (optional) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Can be extended for dark mode */
-  }
+/* ---- Smooth theme transition ---- */
+html {
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+html * {
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.2s ease, box-shadow 0.35s ease;
+}
+
+/* =============================================
+   LIGHT MODE — Liquid Glass on White
+   ============================================= */
+[data-theme="light"] {
+  /* Accent — same teal */
+  --color-primary: #00b894;
+  --color-primary-light: #00d4aa;
+  --color-primary-dark: #009b7d;
+  --color-primary-50: rgba(0, 184, 148, 0.06);
+  --color-primary-100: rgba(0, 184, 148, 0.12);
+
+  /* Surfaces */
+  --color-gray-50: #fafbfc;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Semantic */
+  --color-success: #059669;
+  --color-success-light: #10b981;
+  --color-success-bg: rgba(5, 150, 105, 0.08);
+  --color-warning: #d97706;
+  --color-warning-light: #f59e0b;
+  --color-warning-bg: rgba(217, 119, 6, 0.08);
+  --color-error: #dc2626;
+  --color-error-light: #ef4444;
+  --color-error-bg: rgba(220, 38, 38, 0.06);
+  --color-info: #2563eb;
+  --color-info-light: #3b82f6;
+  --color-info-bg: rgba(37, 99, 235, 0.06);
+
+  /* Status */
+  --status-pending: var(--color-warning);
+  --status-pending-bg: var(--color-warning-bg);
+  --status-approved: var(--color-success);
+  --status-approved-bg: var(--color-success-bg);
+  --status-rejected: var(--color-error);
+  --status-rejected-bg: var(--color-error-bg);
+  --status-completed: #7c3aed;
+  --status-completed-bg: rgba(124, 58, 237, 0.08);
+
+  /* Backgrounds */
+  --bg-body: #f0f2f5;
+  --bg-card: rgba(255, 255, 255, 0.65);
+  --bg-sidebar: rgba(255, 255, 255, 0.55);
+  --bg-hover: rgba(0, 0, 0, 0.03);
+
+  /* Glass — lighter, more translucent */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-hover: rgba(255, 255, 255, 0.7);
+  --glass-bg-active: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-border-light: rgba(0, 0, 0, 0.1);
+
+  /* Text */
+  --text-primary: #111827;
+  --text-secondary: rgba(0, 0, 0, 0.5);
+  --text-muted: rgba(0, 0, 0, 0.3);
+  --text-inverse: #ffffff;
+  --text-link: var(--color-primary);
+
+  /* Borders */
+  --border-default: rgba(0, 0, 0, 0.06);
+  --border-focus: var(--color-primary);
+  --border-error: var(--color-error);
+
+  /* Shadows — softer for light */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 30px rgba(0, 184, 148, 0.06);
+  --shadow-glow-strong: 0 0 50px rgba(0, 184, 148, 0.1);
 }

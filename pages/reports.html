@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/pages.css">
+    <link rel="stylesheet" href="../css/theme-toggle.css">
+    <script src="../js/theme.js"></script>
 </head>
 
 <body>
@@ -24,15 +26,29 @@
                     <div class="nav-section-title">Main</div>
                     <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span>Dashboard</a>
                     <a href="resources.html" class="nav-item"><span class="nav-item-icon">🏟️</span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon">📅</span>Calendar</a>
                 </div>
                 <div class="nav-section">
+                    <div class="nav-section-title">Bookings</div>
+                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon">➕</span>New Booking</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
+                </div>
+                <div class="nav-section" data-role="faculty,admin">
+                    <div class="nav-section-title">Faculty</div>
+                    <a href="usage-upload.html" class="nav-item" data-role="faculty,admin"><span
+                            class="nav-item-icon">📤</span>Upload Usage</a>
+                </div>
+                <div class="nav-section" data-role="admin">
                     <div class="nav-section-title">Admin</div>
-                    <a href="approvals.html" class="nav-item"><span class="nav-item-icon">✓</span>Approvals</a>
-                    <a href="reports.html" class="nav-item active"><span class="nav-item-icon">📈</span>Reports</a>
+                    <a href="approvals.html" class="nav-item" data-role="admin"><span
+                            class="nav-item-icon">✓</span>Approvals</a>
+                    <a href="reports.html" class="nav-item active" data-role="admin"><span
+                            class="nav-item-icon">📈</span>Reports</a>
                 </div>
             </nav>
             <div class="sidebar-footer">
-                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon">🚪</span>Logout</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
+                        class="nav-item-icon">🚪</span>Logout</a>
             </div>
         </aside>
 
@@ -43,6 +59,8 @@
                     <h1 class="navbar-title">Reports</h1>
                 </div>
                 <div class="navbar-right">
+                    <button class="theme-toggle" aria-label="Toggle theme"><span
+                            class="theme-toggle-knob"></span></button>
                     <button class="btn btn-secondary btn-sm">📥 Export CSV</button>
                     <div class="navbar-user">
                         <div class="navbar-user-info">

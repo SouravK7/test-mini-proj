@@ -140,6 +140,12 @@ const App = {
         const user = AUTH.getCurrentUser();
         if (!user) return;
 
+        // Hide stats section for non-admin users
+        const statsSection = document.getElementById('stats-section');
+        if (statsSection && user.role !== 'admin') {
+            statsSection.style.display = 'none';
+        }
+
         // Load stats for admin
         if (user.role === 'admin') {
             const result = await API.getDashboardStats();

@@ -1,9 +1,8 @@
 /* =============================================
-   BASE STYLES & CSS RESET
+   LIQUID GLASS — BASE STYLES & RESET
    ============================================= */
 
-/* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Box sizing */
 *,
@@ -12,13 +11,11 @@
     box-sizing: border-box;
 }
 
-/* Reset margins and padding */
 * {
     margin: 0;
     padding: 0;
 }
 
-/* Prevent font size inflation */
 html {
     -moz-text-size-adjust: none;
     -webkit-text-size-adjust: none;
@@ -26,7 +23,6 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Body defaults */
 body {
     font-family: var(--font-family);
     font-size: var(--font-size-base);
@@ -36,15 +32,29 @@ body {
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv11', 'ss01';
+    letter-spacing: -0.01em;
+    /* Subtle ambient mesh gradient — pure CSS, no images */
+    background-image:
+        radial-gradient(ellipse 80% 50% at 10% 90%, rgba(0, 212, 170, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 85% 20%, rgba(96, 165, 250, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 60% at 50% 50%, rgba(167, 139, 250, 0.03) 0%, transparent 50%);
+    background-attachment: fixed;
 }
 
-/* Remove list styles */
+/* Light mode body gradient */
+[data-theme="light"] body {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 10% 90%, rgba(0, 184, 148, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 85% 20%, rgba(37, 99, 235, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 60% at 50% 50%, rgba(124, 58, 237, 0.03) 0%, transparent 50%);
+}
+
 ul,
 ol {
     list-style: none;
 }
 
-/* Balance text wrapping on headings */
 h1,
 h2,
 h3,
@@ -55,14 +65,19 @@ h6 {
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-tight);
     color: var(--text-primary);
+    letter-spacing: -0.025em;
 }
 
 h1 {
     font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.03em;
 }
 
 h2 {
     font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.025em;
 }
 
 h3 {
@@ -81,24 +96,22 @@ h6 {
     font-size: var(--font-size-sm);
 }
 
-/* Paragraphs */
 p {
     text-wrap: pretty;
     color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
 }
 
-/* Links */
 a {
     color: var(--text-link);
     text-decoration: none;
-    transition: color var(--transition-fast);
+    transition: opacity var(--transition-fast);
 }
 
 a:hover {
-    color: var(--color-primary-dark);
+    opacity: 0.8;
 }
 
-/* Images */
 img,
 picture,
 video,
@@ -109,7 +122,6 @@ svg {
     height: auto;
 }
 
-/* Form elements */
 input,
 button,
 textarea,
@@ -118,34 +130,30 @@ select {
     color: inherit;
 }
 
-/* Text areas */
 textarea {
     resize: vertical;
 }
 
-/* Tables */
 table {
     border-collapse: collapse;
     width: 100%;
 }
 
-/* Focus styles */
 :focus-visible {
-    outline: 2px solid var(--border-focus);
+    outline: 2px solid rgba(0, 212, 170, 0.5);
     outline-offset: 2px;
+    border-radius: var(--radius-sm);
 }
 
-/* Selection */
 ::selection {
-    background-color: var(--color-primary-100);
-    color: var(--color-primary-dark);
+    background-color: rgba(0, 212, 170, 0.2);
+    color: var(--text-primary);
 }
 
 /* =============================================
    UTILITY CLASSES
    ============================================= */
 
-/* Flex utilities */
 .flex {
     display: flex;
 }
@@ -206,7 +214,6 @@ table {
     gap: var(--space-8);
 }
 
-/* Grid utilities */
 .grid {
     display: grid;
 }
@@ -223,7 +230,6 @@ table {
     grid-template-columns: repeat(4, 1fr);
 }
 
-/* Spacing utilities */
 .m-0 {
     margin: 0;
 }
@@ -260,6 +266,15 @@ table {
     margin-right: auto;
 }
 
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.p-0 {
+    padding: 0;
+}
+
 .p-2 {
     padding: var(--space-2);
 }
@@ -291,7 +306,6 @@ table {
     padding-bottom: var(--space-3);
 }
 
-/* Text utilities */
 .text-left {
     text-align: left;
 }
@@ -364,7 +378,6 @@ table {
     color: var(--color-error);
 }
 
-/* Display utilities */
 .hidden {
     display: none;
 }
@@ -389,7 +402,6 @@ table {
     min-height: 100vh;
 }
 
-/* Border utilities */
 .rounded {
     border-radius: var(--radius-md);
 }
@@ -410,7 +422,6 @@ table {
     border: 1px solid var(--border-default);
 }
 
-/* Shadow utilities */
 .shadow {
     box-shadow: var(--shadow-md);
 }
@@ -423,7 +434,6 @@ table {
     box-shadow: var(--shadow-lg);
 }
 
-/* Cursor */
 .cursor-pointer {
     cursor: pointer;
 }
@@ -432,7 +442,6 @@ table {
     cursor: not-allowed;
 }
 
-/* Overflow */
 .overflow-hidden {
     overflow: hidden;
 }
@@ -441,7 +450,6 @@ table {
     overflow: auto;
 }
 
-/* Position */
 .relative {
     position: relative;
 }
@@ -458,12 +466,10 @@ table {
     position: sticky;
 }
 
-/* Transitions */
 .transition {
     transition: all var(--transition-normal);
 }
 
-/* Screen reader only */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -477,9 +483,8 @@ table {
 }
 
 /* =============================================
-   RESPONSIVE UTILITIES
+   RESPONSIVE
    ============================================= */
-
 @media (max-width: 768px) {
     .md\:hidden {
         display: none;

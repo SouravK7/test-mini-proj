@@ -1,249 +1,150 @@
 /* =============================================
    API ABSTRACTION LAYER
-   Swap mock calls with real fetch() when backend is ready
+   Real API implementation using fetch()
    ============================================= */
 
 const API = {
-    // Base URL - change when backend is ready
-    baseUrl: '',
+    // Base URL - change to your backend URL
+    baseUrl: 'http://localhost:3000',
 
-    // Simulate network delay for realistic behavior
-    delay: (ms = 300) => new Promise(resolve => setTimeout(resolve, ms)),
+    // Get auth token from storage
+    getToken() {
+        const session = localStorage.getItem('tec_user_session');
+        if (session) {
+            const parsed = JSON.parse(session);
+            return parsed.token;
+        }
+        return null;
+    },
+
+    // Create headers with auth token
+    getHeaders() {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = this.getToken();
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return headers;
+    },
+
+    // Generic fetch wrapper
+    async request(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${this.baseUrl}${endpoint}`, {
+                ...options,
+                headers: this.getHeaders()
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return { success: false, error: data.error || 'Request failed' };
+            }
+
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: 'Network error. Please try again.' };
+        }
+    },
 
     // ============ RESOURCES ============
     async getResources(filters = {}) {
-        await this.delay();
-        let resources = [...MockData.resources];
+        const params = new URLSearchParams();
+        if (filters.type) params.append('type', filters.type);
+        if (filters.status) params.append('status', filters.status);
+        if (filters.search) params.append('search', filters.search);
 
-        if (filters.type) {
-            resources = resources.filter(r => r.subType === filters.type);
-        }
-        if (filters.status) {
-            resources = resources.filter(r => r.status === filters.status);
-        }
-        if (filters.search) {
-            const search = filters.search.toLowerCase();
-            resources = resources.filter(r =>
-                r.name.toLowerCase().includes(search) ||
-                r.location.toLowerCase().includes(search)
-            );
-        }
-
-        return { success: true, data: resources };
+        const queryString = params.toString();
+        return this.request(`/api/resources${queryString ? '?' + queryString : ''}`);
     },
 
     async getResourceById(id) {
-        await this.delay();
-        const resource = MockData.resources.find(r => r.id === parseInt(id));
-        if (!resource) {
-            return { success: false, error: 'Resource not found' };
-        }
-        return { success: true, data: resource };
+        return this.request(`/api/resources/${id}`);
     },
 
     async createResource(data) {
-        await this.delay();
-        const newResource = {
-            id: MockData.resources.length + 1,
-            ...data,
-            status: 'available'
-        };
-        MockData.resources.push(newResource);
-        return { success: true, data: newResource };
+        return this.request('/api/resources', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
     },
 
     async updateResource(id, data) {
-        await this.delay();
-        const index = MockData.resources.findIndex(r => r.id === parseInt(id));
-        if (index === -1) {
-            return { success: false, error: 'Resource not found' };
-        }
-        MockData.resources[index] = { ...MockData.resources[index], ...data };
-        return { success: true, data: MockData.resources[index] };
+        return this.request(`/api/resources/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
     },
 
     async deleteResource(id) {
-        await this.delay();
-        const index = MockData.resources.findIndex(r => r.id === parseInt(id));
-        if (index === -1) {
-            return { success: false, error: 'Resource not found' };
-        }
-        MockData.resources.splice(index, 1);
-        return { success: true };
+        return this.request(`/api/resources/${id}`, { method: 'DELETE' });
     },
 
     // ============ BOOKINGS ============
     async getBookings(filters = {}) {
-        await this.delay();
-        let bookings = [...MockData.bookings];
+        const params = new URLSearchParams();
+        if (filters.userId) params.append('userId', filters.userId);
+        if (filters.resourceId) params.append('resourceId', filters.resourceId);
+        if (filters.status) params.append('status', filters.status);
+        if (filters.date) params.append('date', filters.date);
 
-        if (filters.userId) {
-            bookings = bookings.filter(b => b.userId === parseInt(filters.userId));
-        }
-        if (filters.resourceId) {
-            bookings = bookings.filter(b => b.resourceId === parseInt(filters.resourceId));
-        }
-        if (filters.status) {
-            bookings = bookings.filter(b => b.status === filters.status);
-        }
-        if (filters.date) {
-            bookings = bookings.filter(b => b.date === filters.date);
-        }
-
-        // Enrich with resource and user data
-        bookings = bookings.map(b => ({
-            ...b,
-            resource: MockData.resources.find(r => r.id === b.resourceId),
-            user: MockData.users.find(u => u.id === b.userId),
-            slot: MockData.timeSlots.find(s => s.id === b.slotId)
-        }));
-
-        return { success: true, data: bookings };
+        const queryString = params.toString();
+        return this.request(`/api/bookings${queryString ? '?' + queryString : ''}`);
     },
 
     async getBookingById(id) {
-        await this.delay();
-        const booking = MockData.bookings.find(b => b.id === parseInt(id));
-        if (!booking) {
-            return { success: false, error: 'Booking not found' };
-        }
-        return {
-            success: true,
-            data: {
-                ...booking,
-                resource: MockData.resources.find(r => r.id === booking.resourceId),
-                user: MockData.users.find(u => u.id === booking.userId),
-                slot: MockData.timeSlots.find(s => s.id === booking.slotId)
-            }
-        };
+        return this.request(`/api/bookings/${id}`);
     },
 
     async createBooking(data) {
-        await this.delay();
-
-        // Check for conflicts
-        const conflict = MockData.bookings.find(b =>
-            b.resourceId === parseInt(data.resourceId) &&
-            b.date === data.date &&
-            b.slotId === parseInt(data.slotId) &&
-            ['pending', 'approved'].includes(b.status)
-        );
-
-        if (conflict) {
-            return { success: false, error: 'Time slot already booked' };
-        }
-
-        const newBooking = {
-            id: MockData.bookings.length + 1,
-            ...data,
-            resourceId: parseInt(data.resourceId),
-            slotId: parseInt(data.slotId),
-            status: 'pending',
-            createdAt: new Date().toISOString()
-        };
-        MockData.bookings.push(newBooking);
-        return { success: true, data: newBooking };
+        return this.request('/api/bookings', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
     },
 
     async updateBookingStatus(id, status, reason = null) {
-        await this.delay();
-        const index = MockData.bookings.findIndex(b => b.id === parseInt(id));
-        if (index === -1) {
-            return { success: false, error: 'Booking not found' };
-        }
-
-        const currentUser = AUTH.getCurrentUser();
-        MockData.bookings[index].status = status;
-
-        if (status === 'approved') {
-            MockData.bookings[index].approvedBy = currentUser?.id;
-            MockData.bookings[index].approvedAt = new Date().toISOString();
-        } else if (status === 'rejected') {
-            MockData.bookings[index].rejectedBy = currentUser?.id;
-            MockData.bookings[index].rejectedAt = new Date().toISOString();
-            MockData.bookings[index].rejectionReason = reason;
-        }
-
-        return { success: true, data: MockData.bookings[index] };
+        return this.request(`/api/bookings/${id}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({ status, reason })
+        });
     },
 
     async cancelBooking(id) {
-        return this.updateBookingStatus(id, 'cancelled');
+        return this.request(`/api/bookings/${id}`, { method: 'DELETE' });
     },
 
     // ============ AVAILABILITY ============
     async checkAvailability(resourceId, date) {
-        await this.delay(200);
-
-        const bookedSlots = MockData.bookings
-            .filter(b =>
-                b.resourceId === parseInt(resourceId) &&
-                b.date === date &&
-                ['pending', 'approved'].includes(b.status)
-            )
-            .map(b => b.slotId);
-
-        const slots = MockData.timeSlots.map(slot => ({
-            ...slot,
-            available: !bookedSlots.includes(slot.id)
-        }));
-
-        return { success: true, data: slots };
+        return this.request(`/api/bookings/availability/${resourceId}/${date}`);
     },
 
     // ============ USAGE RECORDS ============
     async getUsageRecords(filters = {}) {
-        await this.delay();
-        let records = [...MockData.usageRecords];
+        const params = new URLSearchParams();
+        if (filters.bookingId) params.append('bookingId', filters.bookingId);
 
-        if (filters.bookingId) {
-            records = records.filter(r => r.bookingId === parseInt(filters.bookingId));
-        }
-
-        return { success: true, data: records };
+        const queryString = params.toString();
+        return this.request(`/api/usage-records${queryString ? '?' + queryString : ''}`);
     },
 
     async createUsageRecord(data) {
-        await this.delay();
-        const currentUser = AUTH.getCurrentUser();
-        const newRecord = {
-            id: MockData.usageRecords.length + 1,
-            ...data,
-            uploadedBy: currentUser?.id,
-            uploadedAt: new Date().toISOString()
-        };
-        MockData.usageRecords.push(newRecord);
-
-        // Mark booking as completed
-        const bookingIndex = MockData.bookings.findIndex(b => b.id === parseInt(data.bookingId));
-        if (bookingIndex !== -1) {
-            MockData.bookings[bookingIndex].status = 'completed';
-        }
-
-        return { success: true, data: newRecord };
+        return this.request('/api/usage-records', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
     },
 
     // ============ STATS ============
     async getDashboardStats() {
-        await this.delay();
-        const today = new Date().toISOString().split('T')[0];
-
-        return {
-            success: true,
-            data: {
-                totalResources: MockData.resources.length,
-                activeResources: MockData.resources.filter(r => r.status === 'available').length,
-                bookingsToday: MockData.bookings.filter(b => b.date === today).length,
-                pendingApprovals: MockData.bookings.filter(b => b.status === 'pending').length,
-                completedThisMonth: MockData.bookings.filter(b => b.status === 'completed').length,
-                totalUsers: MockData.users.length
-            }
-        };
+        return this.request('/api/stats/dashboard');
     },
 
     // ============ TIME SLOTS ============
-    getTimeSlots() {
-        return MockData.timeSlots;
+    async getTimeSlots() {
+        const result = await this.request('/api/time-slots');
+        return result.success ? result.data : [];
     }
 };
 
