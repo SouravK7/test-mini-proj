@@ -1,0 +1,14 @@
+{
+    "name": "coet-ground-booking",
+    "version": "1.0.0",
+    "description": "COET Ground Booking System",
+    "private": true,
+    "scripts": {
+        "dev": "nodemon backend/server.js",
+        "start": "node backend/server.js",
+        "install:backend": "cd backend && npm install"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.14"
+    }
+}

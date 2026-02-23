@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 
@@ -17,6 +18,10 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// Serve frontend static files from the project root
+const frontendPath = path.join(__dirname, '..');
+app.use(express.static(frontendPath));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -38,11 +43,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// Catch-all: serve index.html for non-API routes (handles page refreshes)
 app.use((req, res) => {
-  res.status(404).json({ success: false, error: 'Endpoint not found' });
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 App running on http://localhost:${PORT}`);
 });
