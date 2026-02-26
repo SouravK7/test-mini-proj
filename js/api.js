@@ -4,8 +4,8 @@
    ============================================= */
 
 const API = {
-    // Base URL - uses same origin since frontend & backend are served together
-    baseUrl: '',
+    // Base URL - point directly to backend for local development 
+    baseUrl: `http://${window.location.hostname}:3000`,
 
     // Get auth token from storage
     getToken() {

@@ -7,8 +7,8 @@ const AUTH = {
     // Storage key
     STORAGE_KEY: 'tec_user_session',
 
-    // API Base URL - uses same origin since frontend & backend are served together
-    baseUrl: '',
+    // API Base URL - point directly to backend for local development
+    baseUrl: `http://${window.location.hostname}:3000`,
 
     // Login
     async login(email, password) {

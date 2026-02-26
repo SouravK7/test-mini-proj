@@ -172,10 +172,13 @@ const App = {
         const filters = user.role === 'admin' ? {} : { userId: user.id };
 
         const result = await API.getBookings(filters);
-        if (!result.success) return;
-
         const container = document.getElementById('recent-bookings');
         if (!container) return;
+
+        if (!result.success) {
+            container.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-danger">Failed to load bookings. ${result.error || ''}</td></tr>`;
+            return;
+        }
 
         const bookings = result.data.slice(0, 5);
 
@@ -215,7 +218,13 @@ const App = {
         Utils.hideLoading(loading);
 
         if (!result.success) {
-            Notifications.error('Error', 'Failed to load resources');
+            container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon text-danger">⚠️</div>
+          <div class="empty-state-title">Failed to load resources</div>
+          <div class="empty-state-description">${result.error || 'Network error'}</div>
+        </div>
+      `;
             return;
         }
 
@@ -285,11 +294,20 @@ const App = {
     },
 
     renderResourceDetail(resource) {
-        document.getElementById('resource-name')?.textContent = resource.name;
-        document.getElementById('resource-location')?.textContent = resource.location;
-        document.getElementById('resource-capacity')?.textContent = resource.capacity;
-        document.getElementById('resource-description')?.textContent = resource.description;
-        document.getElementById('resource-status')?.innerHTML = Utils.getStatusBadge(resource.status);
+        const nameEl = document.getElementById('resource-name');
+        if (nameEl) nameEl.textContent = resource.name;
+
+        const locationEl = document.getElementById('resource-location');
+        if (locationEl) locationEl.textContent = resource.location;
+
+        const capacityEl = document.getElementById('resource-capacity');
+        if (capacityEl) capacityEl.textContent = resource.capacity;
+
+        const descEl = document.getElementById('resource-description');
+        if (descEl) descEl.textContent = resource.description;
+
+        const statusEl = document.getElementById('resource-status');
+        if (statusEl) statusEl.innerHTML = Utils.getStatusBadge(resource.status);
 
         const amenitiesList = document.getElementById('resource-amenities');
         if (amenitiesList && resource.amenities) {
@@ -467,7 +485,10 @@ const App = {
         if (status) filters.status = status;
 
         const result = await API.getBookings(filters);
-        if (!result.success) return;
+        if (!result.success) {
+            container.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-danger">Failed to load bookings. ${result.error || ''}</td></tr>`;
+            return;
+        }
 
         if (result.data.length === 0) {
             container.innerHTML = `
@@ -535,7 +556,10 @@ const App = {
         if (!container) return;
 
         const result = await API.getBookings({ status: 'pending' });
-        if (!result.success) return;
+        if (!result.success) {
+            container.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-danger">Failed to load approvals. ${result.error || ''}</td></tr>`;
+            return;
+        }
 
         if (result.data.length === 0) {
             container.innerHTML = `
@@ -618,7 +642,8 @@ const App = {
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'];
 
-        document.getElementById('calendar-month')?.textContent = `${monthNames[month]} ${year}`;
+        const monthTitle = document.getElementById('calendar-month');
+        if (monthTitle) monthTitle.textContent = `${monthNames[month]} ${year}`;
 
         let html = '<div class="mini-calendar-grid">';
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -717,7 +742,10 @@ const App = {
         if (!container) return;
 
         const result = await API.getBookings({});
-        if (!result.success) return;
+        if (!result.success) {
+            container.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-danger">Failed to load reports. ${result.error || ''}</td></tr>`;
+            return;
+        }
 
         container.innerHTML = result.data.map(b => `
       <tr>

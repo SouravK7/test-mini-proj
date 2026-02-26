@@ -15,7 +15,8 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors({
   origin: process.env.CORS_ORIGINS?.split(',') || '*',
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
@@ -43,8 +44,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Catch-all: serve index.html for non-API routes (handles page refreshes)
+// Catch-all route mapping
 app.use((req, res) => {
+  // If it's an API route that wasn't matched, return a JSON 404 error
+  if (req.originalUrl.startsWith('/api/')) {
+    return res.status(404).json({
+      success: false,
+      error: 'API endpoint not found'
+    });
+  }
+  // Otherwise, serve index.html for non-API routes (handles page refreshes)
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
