@@ -19,47 +19,46 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon">🏛️</div>
+                    <div class="sidebar-logo-icon"><i class="fa-solid fa-landmark"></i></div>
                     <span>Ground Booking</span>
                 </div>
             </div>
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
-                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span>Dashboard</a>
-                    <a href="resources.html" class="nav-item active"><span class="nav-item-icon">🏟️</span>Resources</a>
-                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon">📅</span>Calendar</a>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-chart-bar"></i></span>Dashboard</a>
+                    <a href="resources.html" class="nav-item active"><span class="nav-item-icon"><i class="fa-solid fa-futbol"></i></span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar</a>
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">Bookings</div>
-                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon">➕</span>New Booking</a>
-                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
+                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-plus"></i></span>New Booking</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Bookings</a>
                 </div>
                 <div class="nav-section" data-role="faculty,admin">
-                    <div class="nav-section-title">Faculty</div>
-                    <a href="usage-upload.html" class="nav-item"><span class="nav-item-icon">📤</span>Upload Usage</a>
+                    <div class="nav-section-title">Usage Management</div>
+                    <a href="usage-upload.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>Upload Usage</a>
                 </div>
                 <div class="nav-section" data-role="admin">
-                    <div class="nav-section-title">Admin</div>
-                    <a href="approvals.html" class="nav-item"><span class="nav-item-icon">✓</span>Approvals</a>
-                    <a href="reports.html" class="nav-item"><span class="nav-item-icon">📈</span>Reports</a>
+                    <div class="nav-section-title">Approval & Reports</div>
+                    <a href="approvals.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-check"></i></span>Approvals</a>
+                    <a href="reports.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>Reports</a>
                 </div>
             </nav>
             <div class="sidebar-footer">
                 <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
-                        class="nav-item-icon">🚪</span>Logout</a>
+                        class="nav-item-icon"><i class="fa-solid fa-right-from-bracket"></i></span>Logout</a>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="navbar">
                 <div class="navbar-left">
-                    <button class="btn btn-ghost mobile-menu-btn">☰</button>
+                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
                     <h1 class="navbar-title">Resources</h1>
                 </div>
                 <div class="navbar-right">
-                    <button class="theme-toggle" aria-label="Toggle theme"><span
-                            class="theme-toggle-knob"></span></button>
+                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
                     <div class="navbar-user">
                         <div class="navbar-user-info">
                             <div class="navbar-user-name">-</div>
@@ -79,7 +78,7 @@
                 <!-- Filters -->
                 <div class="filters-bar">
                     <div class="search-input-wrapper">
-                        <span class="search-icon">🔍</span>
+                        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
                         <input type="text" id="search-input" class="form-input search-input"
                             placeholder="Search resources...">
                     </div>

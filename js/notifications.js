@@ -20,10 +20,10 @@ const Notifications = {
         this.init();
 
         const icons = {
-            success: '✓',
-            error: '✕',
-            warning: '⚠',
-            info: 'ℹ'
+            success: '<i class="fa-solid fa-check"></i>',
+            error: '<i class="fa-solid fa-xmark"></i>',
+            warning: '<i class="fa-solid fa-triangle-exclamation"></i>',
+            info: '<i class="fa-solid fa-circle-info"></i>'
         };
 
         const toast = document.createElement('div');
@@ -34,7 +34,7 @@ const Notifications = {
         <div class="toast-title">${title}</div>
         ${message ? `<div class="toast-message">${message}</div>` : ''}
       </div>
-      <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+      <button class="toast-close" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
     `;
 
         this.container.appendChild(toast);

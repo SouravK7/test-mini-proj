@@ -173,7 +173,7 @@ const Modal = {
         return new Promise((resolve) => {
             const { title, message, confirmText = 'Confirm', cancelText = 'Cancel', type = 'warning' } = options;
 
-            const icons = { warning: '⚠', danger: '⚠', success: '✓' };
+            const icons = { warning: '<i class="fa-solid fa-triangle-exclamation"></i>', danger: '<i class="fa-solid fa-triangle-exclamation"></i>', success: '<i class="fa-solid fa-check"></i>' };
 
             const backdrop = Utils.createElement(`
         <div class="modal-backdrop active" id="confirm-modal">

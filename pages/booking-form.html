@@ -57,23 +57,30 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
-            background: white;
+            background: var(--glass-bg);
+            color: var(--text-primary);
         }
 
         .slot-option:hover:not(.disabled) {
             border-color: var(--color-primary);
             background: var(--color-primary-50);
+            color: var(--text-primary);
         }
 
         .slot-option.selected {
             border-color: var(--color-primary);
             background: var(--color-primary);
-            color: white;
+            color: var(--text-inverse);
+        }
+
+        .slot-option.selected .slot-time,
+        .slot-option.selected .slot-status {
+            color: var(--text-inverse);
         }
 
         .slot-option.disabled {
-            background: var(--color-gray-100);
-            color: var(--text-disabled);
+            background: var(--color-gray-200);
+            color: var(--text-muted);
             cursor: not-allowed;
             text-decoration: line-through;
         }
@@ -81,11 +88,13 @@
         .slot-option .slot-time {
             font-weight: 600;
             font-size: 14px;
+            color: var(--text-primary);
         }
 
         .slot-option .slot-status {
             font-size: 12px;
             margin-top: 4px;
+            color: var(--text-secondary);
         }
 
         .custom-time-section {
@@ -138,50 +147,49 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon">🏛️</div><span>Ground Booking</span>
+                    <div class="sidebar-logo-icon"><i class="fa-solid fa-landmark"></i></div><span>Ground Booking</span>
                 </div>
             </div>
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
-                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon">📊</span>Dashboard</a>
-                    <a href="resources.html" class="nav-item"><span class="nav-item-icon">🏟️</span>Resources</a>
-                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon">📅</span>Calendar</a>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-chart-bar"></i></span>Dashboard</a>
+                    <a href="resources.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-futbol"></i></span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar</a>
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">Bookings</div>
-                    <a href="booking-form.html" class="nav-item active"><span class="nav-item-icon">➕</span>New
+                    <a href="booking-form.html" class="nav-item active"><span class="nav-item-icon"><i class="fa-solid fa-plus"></i></span>New
                         Booking</a>
-                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon">📋</span>My Bookings</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Bookings</a>
                 </div>
                 <div class="nav-section" data-role="faculty,admin">
-                    <div class="nav-section-title">Faculty</div>
+                    <div class="nav-section-title">Usage Management</div>
                     <a href="usage-upload.html" class="nav-item" data-role="faculty,admin"><span
-                            class="nav-item-icon">📤</span>Upload Usage</a>
+                            class="nav-item-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>Upload Usage</a>
                 </div>
                 <div class="nav-section" data-role="admin">
-                    <div class="nav-section-title">Admin</div>
+                    <div class="nav-section-title">Approval & Reports</div>
                     <a href="approvals.html" class="nav-item" data-role="admin"><span
-                            class="nav-item-icon">✓</span>Approvals</a>
+                            class="nav-item-icon"><i class="fa-solid fa-check"></i></span>Approvals</a>
                     <a href="reports.html" class="nav-item" data-role="admin"><span
-                            class="nav-item-icon">📈</span>Reports</a>
+                            class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>Reports</a>
                 </div>
             </nav>
             <div class="sidebar-footer">
                 <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
-                        class="nav-item-icon">🚪</span>Logout</a>
+                        class="nav-item-icon"><i class="fa-solid fa-right-from-bracket"></i></span>Logout</a>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="navbar">
                 <div class="navbar-left">
-                    <button class="btn btn-ghost mobile-menu-btn">☰</button>
+                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
                     <h1 class="navbar-title">New Booking Request</h1>
                 </div>
                 <div class="navbar-right">
-                    <button class="theme-toggle" aria-label="Toggle theme"><span
-                            class="theme-toggle-knob"></span></button>
+                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
                     <div class="navbar-user">
                         <div class="navbar-user-info">
                             <div class="navbar-user-name">-</div>
@@ -197,7 +205,7 @@
                     <!-- Step 1: Select Resource -->
                     <div class="card mb-6">
                         <div class="card-header">
-                            <h3 class="card-title">📍 Step 1: Select Resource</h3>
+                            <h3 class="card-title"><i class="fa-solid fa-location-dot"></i> Step 1: Select Resource</h3>
                         </div>
                         <div class="card-body">
                             <div class="form-group" style="margin-bottom: 0;">
@@ -209,7 +217,7 @@
                             <div id="resource-preview" class="resource-preview">
                                 <h4 id="preview-name">Resource Name</h4>
                                 <div class="meta">
-                                    <span id="preview-status">✓ Available</span>
+                                    <span id="preview-status"><i class="fa-solid fa-check"></i> Available</span>
                                 </div>
                                 <p id="preview-description" class="text-sm mt-3" style="color: var(--text-secondary);">
                                 </p>
@@ -220,7 +228,7 @@
                     <!-- Step 2: Select Date -->
                     <div class="card mb-6">
                         <div class="card-header">
-                            <h3 class="card-title">📅 Step 2: Select Date</h3>
+                            <h3 class="card-title"><i class="fa-solid fa-calendar-days"></i> Step 2: Select Date</h3>
                         </div>
                         <div class="card-body">
                             <div class="form-group" style="margin-bottom: 0;">
@@ -245,7 +253,7 @@
                     <!-- Step 3: Select Time Slot -->
                     <div class="card mb-6">
                         <div class="card-header">
-                            <h3 class="card-title">⏰ Step 3: Select Time Slot</h3>
+                            <h3 class="card-title"><i class="fa-solid fa-clock"></i> Step 3: Select Time Slot</h3>
                         </div>
                         <div class="card-body">
                             <p class="text-sm text-secondary mb-4" id="slot-instruction">Select a resource and date
@@ -262,7 +270,7 @@
                                     <div class="flex items-center gap-3">
                                         <input type="checkbox" id="use-custom-time" class="form-check-input">
                                         <label for="use-custom-time" class="form-check-label font-semibold">
-                                            🕐 Need a custom time slot?
+                                            <i class="fa-solid fa-clock"></i> Need a custom time slot?
                                         </label>
                                     </div>
                                     <p class="text-sm text-secondary mt-2">If the preset slots don't work for you,
@@ -280,7 +288,7 @@
                                         </div>
                                     </div>
                                     <p class="text-xs text-secondary mt-2" id="custom-time-note" style="display: none;">
-                                        ⚠️ Custom time requests require special approval and may take longer to process.
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Custom time requests require special approval and may take longer to process.
                                     </p>
                                 </div>
                             </div>
@@ -290,7 +298,7 @@
                     <!-- Step 4: Purpose -->
                     <div class="card mb-6">
                         <div class="card-header">
-                            <h3 class="card-title">📝 Step 4: Booking Details</h3>
+                            <h3 class="card-title"><i class="fa-solid fa-pen"></i> Step 4: Booking Details</h3>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
@@ -314,7 +322,7 @@
                     <!-- Submit -->
                     <div class="flex gap-3">
                         <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
-                            ✓ Submit Booking Request
+                            <i class="fa-solid fa-check"></i> Submit Booking Request
                         </button>
                         <a href="calendar.html" class="btn btn-secondary btn-lg">Cancel</a>
                     </div>
@@ -405,7 +413,7 @@
             if (result.success) {
                 currentResource = result.data;
                 document.getElementById('preview-name').textContent = currentResource.name;
-                document.getElementById('preview-status').textContent = '✓ ' + Utils.capitalize(currentResource.status);
+                document.getElementById('preview-status').innerHTML = '<i class="fa-solid fa-check"></i> ' + Utils.capitalize(currentResource.status);
                 document.getElementById('preview-description').textContent = currentResource.description;
                 preview.classList.add('active');
             }
@@ -451,7 +459,7 @@
                          data-available="${slot.available}"
                          onclick="${isBooked ? '' : 'toggleSlot(' + slot.id + ', this)'}">
                         <div class="slot-time">${slot.label}</div>
-                        <div class="slot-status">${isBooked ? '❌ Booked' : '✓ Available'}</div>
+                        <div class="slot-status">${isBooked ? '<i class="fa-solid fa-xmark"></i> Booked' : '<i class="fa-solid fa-check"></i> Available'}</div>
                     </div>
                 `;
             }).join('');
@@ -535,7 +543,7 @@
             });
 
             btn.disabled = false;
-            btn.textContent = '✓ Submit Booking Request';
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Submit Booking Request';
 
             if (result.success) {
                 Notifications.success('Success!', 'Your booking request has been submitted for approval.');

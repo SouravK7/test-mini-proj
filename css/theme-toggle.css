@@ -55,15 +55,34 @@
     box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
 }
 
-/* Icon inside knob */
-.theme-toggle-knob::after {
-    content: '🌙';
-    font-size: 12px;
-    line-height: 1;
+/* Icons inside knob (Font Awesome — local, works offline) */
+.theme-toggle-knob {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-[data-theme="light"] .theme-toggle-knob::after {
-    content: '☀️';
+.theme-toggle-icon {
+    font-size: 11px;
+    font-style: normal;
+    position: absolute;
+}
+
+.theme-toggle-icon-dark {
+    color: var(--color-gray-800);
+}
+
+.theme-toggle-icon-light {
+    display: none;
+    color: #f59e0b;
+}
+
+[data-theme="light"] .theme-toggle-knob .theme-toggle-icon-dark {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle-knob .theme-toggle-icon-light {
+    display: inline-block;
 }
 
 /* Login page specific positioning */

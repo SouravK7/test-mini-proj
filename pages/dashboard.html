@@ -20,7 +20,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon">🏛️</div>
+                    <div class="sidebar-logo-icon"><i class="fa-solid fa-landmark"></i></div>
                     <span>Ground Booking</span>
                 </div>
             </div>
@@ -29,15 +29,15 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
                     <a href="dashboard.html" class="nav-item active">
-                        <span class="nav-item-icon">📊</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-chart-bar"></i></span>
                         Dashboard
                     </a>
                     <a href="resources.html" class="nav-item">
-                        <span class="nav-item-icon">🏟️</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-futbol"></i></span>
                         Resources
                     </a>
                     <a href="calendar.html" class="nav-item">
-                        <span class="nav-item-icon">📅</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-calendar-days"></i></span>
                         Calendar
                     </a>
                 </div>
@@ -45,31 +45,31 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Bookings</div>
                     <a href="booking-form.html" class="nav-item">
-                        <span class="nav-item-icon">➕</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-plus"></i></span>
                         New Booking
                     </a>
                     <a href="my-bookings.html" class="nav-item">
-                        <span class="nav-item-icon">📋</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-clipboard-list"></i></span>
                         My Bookings
                     </a>
                 </div>
 
                 <div class="nav-section" data-role="faculty,admin">
-                    <div class="nav-section-title">Faculty</div>
+                    <div class="nav-section-title">Usage Management</div>
                     <a href="usage-upload.html" class="nav-item" data-role="faculty,admin">
-                        <span class="nav-item-icon">📤</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
                         Upload Usage
                     </a>
                 </div>
 
                 <div class="nav-section" data-role="admin">
-                    <div class="nav-section-title">Admin</div>
+                    <div class="nav-section-title">Approval & Reports</div>
                     <a href="approvals.html" class="nav-item" data-role="admin">
-                        <span class="nav-item-icon">✓</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-check"></i></span>
                         Approvals
                     </a>
                     <a href="reports.html" class="nav-item" data-role="admin">
-                        <span class="nav-item-icon">📈</span>
+                        <span class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>
                         Reports
                     </a>
                 </div>
@@ -77,7 +77,7 @@
 
             <div class="sidebar-footer">
                 <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()">
-                    <span class="nav-item-icon">🚪</span>
+                    <span class="nav-item-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
                     Logout
                 </a>
             </div>
@@ -88,12 +88,11 @@
             <!-- Navbar -->
             <header class="navbar">
                 <div class="navbar-left">
-                    <button class="btn btn-ghost mobile-menu-btn">☰</button>
+                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
                     <h1 class="navbar-title">Dashboard</h1>
                 </div>
                 <div class="navbar-right">
-                    <button class="theme-toggle" aria-label="Toggle theme"><span
-                            class="theme-toggle-knob"></span></button>
+                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
                     <div class="dropdown">
                         <div class="navbar-user" data-dropdown>
                             <div class="navbar-user-info">
@@ -103,9 +102,9 @@
                             <div class="avatar">--</div>
                         </div>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="my-bookings.html">📋 My Bookings</a>
+                            <a class="dropdown-item" href="my-bookings.html"><i class="fa-solid fa-clipboard-list"></i> My Bookings</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="javascript:void(0)" onclick="AUTH.logout()">🚪 Logout</a>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="AUTH.logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         </div>
                     </div>
                 </div>
@@ -122,25 +121,25 @@
                 <div class="stats-grid" id="stats-section">
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--color-primary-100); color: var(--color-primary);">🏟️</div>
+                            style="background: var(--color-primary-100); color: var(--color-primary);"><i class="fa-solid fa-futbol"></i></div>
                         <div class="stat-value" data-stat="totalResources">-</div>
                         <div class="stat-label">Total Resources</div>
                     </div>
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--color-success-bg); color: var(--color-success);">📅</div>
+                            style="background: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-calendar-days"></i></div>
                         <div class="stat-value" data-stat="bookingsToday">-</div>
                         <div class="stat-label">Bookings Today</div>
                     </div>
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--color-warning-bg); color: var(--color-warning);">⏳</div>
+                            style="background: var(--color-warning-bg); color: var(--color-warning);"><i class="fa-solid fa-hourglass-half"></i></div>
                         <div class="stat-value" data-stat="pendingApprovals">-</div>
                         <div class="stat-label">Pending Approvals</div>
                     </div>
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--status-completed-bg); color: var(--status-completed);">✓</div>
+                            style="background: var(--status-completed-bg); color: var(--status-completed);"><i class="fa-solid fa-check"></i></div>
                         <div class="stat-value" data-stat="completedThisMonth">-</div>
                         <div class="stat-label">Completed This Month</div>
                     </div>
@@ -183,16 +182,16 @@
                         </div>
                         <div class="card-body flex flex-col gap-3">
                             <a href="booking-form.html" class="btn btn-primary w-full">
-                                ➕ New Booking Request
+                                <i class="fa-solid fa-plus"></i> New Booking Request
                             </a>
                             <a href="resources.html" class="btn btn-secondary w-full">
-                                🏟️ Browse Resources
+                                <i class="fa-solid fa-futbol"></i> Browse Resources
                             </a>
                             <a href="calendar.html" class="btn btn-secondary w-full">
-                                📅 View Calendar
+                                <i class="fa-solid fa-calendar-days"></i> View Calendar
                             </a>
                             <a href="my-bookings.html" class="btn btn-secondary w-full">
-                                📋 My Booking History
+                                <i class="fa-solid fa-clipboard-list"></i> My Booking History
                             </a>
                         </div>
                     </div>

@@ -181,6 +181,10 @@
     background: var(--glass-bg-hover);
 }
 
+.stat-card .stat-icon i {
+    font-style: normal;
+}
+
 .stat-card .stat-value {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
@@ -245,6 +249,13 @@
     background: rgba(255, 255, 255, 0.06);
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.12), 0 0 20px rgba(0, 212, 170, 0.06);
+}
+
+/* Dark mode: native select dropdown options — better contrast */
+.form-select option,
+select.form-select option {
+    background: var(--color-gray-100);
+    color: var(--text-primary);
 }
 
 .form-input.is-error {
@@ -735,6 +746,16 @@
 .toast-close:hover {
     background: var(--glass-bg-hover);
     color: var(--text-primary);
+}
+
+.toast-icon i,
+.toast-close i,
+.confirm-icon i {
+    font-style: normal;
+}
+
+.file-upload-icon i {
+    font-style: normal;
 }
 
 .toast.toast-success {

@@ -185,7 +185,7 @@ const App = {
         if (bookings.length === 0) {
             container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">📅</div>
+          <div class="empty-state-icon"><i class="fa-solid fa-calendar-days"></i></div>
           <div class="empty-state-title">No bookings yet</div>
           <div class="empty-state-description">Your booking history will appear here.</div>
         </div>
@@ -220,7 +220,7 @@ const App = {
         if (!result.success) {
             container.innerHTML = `
         <div class="empty-state" style="grid-column: 1/-1;">
-          <div class="empty-state-icon text-danger">⚠️</div>
+          <div class="empty-state-icon text-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
           <div class="empty-state-title">Failed to load resources</div>
           <div class="empty-state-description">${result.error || 'Network error'}</div>
         </div>
@@ -231,7 +231,7 @@ const App = {
         if (result.data.length === 0) {
             container.innerHTML = `
         <div class="empty-state" style="grid-column: 1/-1;">
-          <div class="empty-state-icon">🏟️</div>
+          <div class="empty-state-icon"><i class="fa-solid fa-futbol"></i></div>
           <div class="empty-state-title">No resources found</div>
           <div class="empty-state-description">Try adjusting your filters.</div>
         </div>
@@ -242,7 +242,7 @@ const App = {
         container.innerHTML = result.data.map(r => `
       <div class="card resource-card">
         <div class="resource-card-image">
-          <span>🏟️</span>
+          <span><i class="fa-solid fa-futbol"></i></span>
         </div>
         <div class="resource-card-body">
           <h3 class="resource-card-title">${r.name}</h3>
@@ -311,7 +311,7 @@ const App = {
 
         const amenitiesList = document.getElementById('resource-amenities');
         if (amenitiesList && resource.amenities) {
-            amenitiesList.innerHTML = resource.amenities.map(a => `<li>✓ ${a}</li>`).join('');
+            amenitiesList.innerHTML = resource.amenities.map(a => `<li><i class="fa-solid fa-check"></i> ${a}</li>`).join('');
         }
     },
 
@@ -494,7 +494,7 @@ const App = {
             container.innerHTML = `
         <tr>
           <td colspan="6" class="text-center p-6">
-            <div class="empty-state-icon">📅</div>
+            <div class="empty-state-icon"><i class="fa-solid fa-calendar-days"></i></div>
             <p>No bookings found</p>
           </td>
         </tr>
@@ -565,7 +565,7 @@ const App = {
             container.innerHTML = `
         <tr>
           <td colspan="7" class="text-center p-6">
-            <div class="empty-state-icon">✓</div>
+            <div class="empty-state-icon"><i class="fa-solid fa-check"></i></div>
             <p>No pending approvals</p>
           </td>
         </tr>
@@ -725,7 +725,7 @@ const App = {
             item.innerHTML = `
         <span class="file-item-name">${file.name}</span>
         <span class="file-item-size">${Utils.formatFileSize(file.size)}</span>
-        <button class="file-item-remove" onclick="this.parentElement.remove()">×</button>
+        <button class="file-item-remove" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
       `;
             listContainer.appendChild(item);
         });

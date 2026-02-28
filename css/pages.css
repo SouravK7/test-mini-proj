@@ -119,6 +119,12 @@
     font-size: var(--font-size-sm);
 }
 
+.nav-item-icon i,
+.sidebar-logo-icon i,
+.login-logo i {
+    font-style: normal;
+}
+
 .sidebar-footer {
     padding: var(--space-3);
     border-top: 1px solid var(--border-default);
@@ -316,6 +322,16 @@
 .login-footer a {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
+}
+
+.login-footer .nav-sep {
+    margin: 0 var(--space-2);
+    display: inline-flex;
+    align-items: center;
+}
+
+.login-footer .nav-sep i {
+    font-style: normal;
 }
 
 /* ---- PUBLIC PAGE ---- */
