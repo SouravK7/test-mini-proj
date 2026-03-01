@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="View playground availability at COET - No login required">
-    <title>Public Calendar | COET Ground Booking</title>
+    <meta name="description" content="View resource availability at COET - No login required">
+    <title>Public Calendar | Digital Calendar for Academic Institute</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/components.css">
@@ -19,7 +19,7 @@
     <header class="public-header">
         <div class="public-logo">
             <span style="font-size: 24px;"><i class="fa-solid fa-landmark"></i></span>
-            COET Ground Booking
+            Digital Calendar for Academic Institute
         </div>
         <nav class="public-nav">
             <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
@@ -32,7 +32,7 @@
 
     <div class="public-content">
         <div class="page-header text-center">
-            <h1 class="page-title">Playground Availability</h1>
+            <h1 class="page-title">Resource Availability</h1>
             <p class="page-subtitle">Check availability of college sports facilities - No login required</p>
         </div>
 
@@ -40,9 +40,9 @@
         <div class="card mb-6">
             <div class="card-body flex gap-4 items-end flex-wrap">
                 <div class="form-group" style="margin: 0; flex: 1; min-width: 200px;">
-                    <label class="form-label">Select Playground</label>
+                    <label class="form-label">Select Resource</label>
                     <select id="resource-select" class="form-select">
-                        <option value="">All Playgrounds</option>
+                        <option value="">All Resources</option>
                     </select>
                 </div>
                 <div class="form-group" style="margin: 0;">
@@ -119,7 +119,7 @@
                     <div class="empty-state" style="grid-column: 1/-1;">
                         <div class="empty-state-icon"><i class="fa-solid fa-futbol"></i></div>
                         <div class="empty-state-title">No resources found</div>
-                        <div class="empty-state-description">No playgrounds match your selection.</div>
+                        <div class="empty-state-description">No resources match your selection.</div>
                     </div>
                 `;
                 return;

@@ -89,7 +89,7 @@ router.post('/', authenticate, authorize('admin'), async (req, res, next) => {
       INSERT INTO resources (name, type, sub_type, capacity, location, description, image_url, status)
       VALUES ($1, $2, $3, $4, $5, $6, $7, 'available')
       RETURNING *
-    `, [name, type || 'playground', subType, capacity || 0, location, description, imageUrl]);
+    `, [name, type || 'resource', subType, capacity || 0, location, description, imageUrl]);
 
         const resource = resourceResult.rows[0];
 

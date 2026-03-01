@@ -11,12 +11,12 @@ const MockData = {
     { id: 4, name: 'Community Member', email: 'public@gmail.com', password: 'public123', role: 'user', phone: '9123456780' }
   ],
 
-  // Resources (Playgrounds)
+  // Resources
   resources: [
     {
       id: 1,
       name: 'Main Ground',
-      type: 'playground',
+      type: 'resource',
       subType: 'multi-purpose',
       capacity: 200,
       location: 'Main Campus',
@@ -29,7 +29,7 @@ const MockData = {
     {
       id: 2,
       name: 'Volleyball Court',
-      type: 'playground',
+      type: 'resource',
       subType: 'volleyball',
       capacity: 30,
       location: 'Sports Complex',
