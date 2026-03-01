@@ -15,7 +15,8 @@ router.get('/', authenticate, async (req, res, next) => {
         u.name as user_name, u.email as user_email, u.role as user_role,
         ts.label as slot_label, ts.start_time, ts.end_time,
         approver.name as approved_by_name,
-        rejecter.name as rejected_by_name
+        rejecter.name as rejected_by_name,
+        EXISTS(SELECT 1 FROM usage_records ur WHERE ur.booking_id = b.id) as has_usage_record
       FROM bookings b
       JOIN resources r ON b.resource_id = r.id
       JOIN users u ON b.user_id = u.id
@@ -87,6 +88,7 @@ router.get('/', authenticate, async (req, res, next) => {
             rejectedBy: row.rejected_by,
             rejectedAt: row.rejected_at,
             rejectionReason: row.rejection_reason,
+            hasUsageRecord: row.has_usage_record,
             resource: {
                 id: row.resource_id,
                 name: row.resource_name,
@@ -116,13 +118,34 @@ router.get('/', authenticate, async (req, res, next) => {
 // POST /api/bookings - Create booking
 router.post('/', authenticate, async (req, res, next) => {
     try {
-        const { resourceId, date, slotId, purpose } = req.body;
+        const { resourceId, date, slotId, purpose, isCustom, customStart, customEnd } = req.body;
 
-        if (!resourceId || !date || !slotId || !purpose) {
+        if (!resourceId || !date || !purpose) {
             return res.status(400).json({
                 success: false,
-                error: 'resourceId, date, slotId, and purpose are required'
+                error: 'resourceId, date, and purpose are required'
             });
+        }
+
+        let finalSlotId = slotId;
+
+        if (isCustom) {
+            if (!customStart || !customEnd) {
+                return res.status(400).json({ success: false, error: 'customStart and customEnd are required for custom bookings' });
+            }
+            const customLabel = `Custom: ${customStart} - ${customEnd}`;
+            // Check if this exact custom slot already exists
+            const existingSlot = await query('SELECT id FROM time_slots WHERE label = $1 AND start_time = $2 AND end_time = $3', [customLabel, `${customStart}:00`, `${customEnd}:00`]);
+
+            if (existingSlot.rows.length > 0) {
+                finalSlotId = existingSlot.rows[0].id;
+            } else {
+                // Create a new time slot dynamically, setting is_active=false so it doesn't pollute the generic preset list
+                const newSlot = await query('INSERT INTO time_slots (label, start_time, end_time, is_active) VALUES ($1, $2, $3, false) RETURNING id', [customLabel, `${customStart}:00`, `${customEnd}:00`]);
+                finalSlotId = newSlot.rows[0].id;
+            }
+        } else if (!finalSlotId) {
+            return res.status(400).json({ success: false, error: 'slotId is required for preset bookings' });
         }
 
         // Check for conflicts
@@ -130,10 +153,10 @@ router.post('/', authenticate, async (req, res, next) => {
       SELECT id FROM bookings 
       WHERE resource_id = $1 AND booking_date = $2 AND slot_id = $3 
         AND status IN ('pending', 'approved')
-    `, [resourceId, date, slotId]);
+    `, [resourceId, date, finalSlotId]);
 
         if (conflict.rows.length > 0) {
-            return res.status(409).json({ success: false, error: 'Time slot already booked' });
+            return res.status(409).json({ success: false, error: 'This specific time slot is already booked' });
         }
 
         // Check if resource exists and is available
@@ -150,7 +173,7 @@ router.post('/', authenticate, async (req, res, next) => {
       INSERT INTO bookings (resource_id, user_id, slot_id, booking_date, purpose, status)
       VALUES ($1, $2, $3, $4, $5, 'pending')
       RETURNING *
-    `, [resourceId, req.user.id, slotId, date, purpose]);
+    `, [resourceId, req.user.id, finalSlotId, date, purpose]);
 
         res.status(201).json({ success: true, data: result.rows[0] });
     } catch (error) {

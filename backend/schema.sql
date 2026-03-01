@@ -127,7 +127,9 @@ CREATE TABLE usage_records (
     uploaded_by     INT             NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     remarks         TEXT            NULL,
     issues          TEXT            NULL,
-    uploaded_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+    gdrive_link     VARCHAR(1000)   NULL,
+    uploaded_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(booking_id)
 );
 
 CREATE INDEX idx_usage_booking ON usage_records(booking_id);
