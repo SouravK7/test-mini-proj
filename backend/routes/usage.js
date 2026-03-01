@@ -37,10 +37,10 @@ router.post('/', authenticate, async (req, res, next) => {
     try {
         const { bookingId, remarks, issues, gdriveLink } = req.body;
 
-        if (!bookingId || !remarks) {
+        if (!bookingId || !remarks || !gdriveLink) {
             return res.status(400).json({
                 success: false,
-                error: 'bookingId and remarks are required'
+                error: 'bookingId, remarks, and gdriveLink are required'
             });
         }
 

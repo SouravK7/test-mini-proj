@@ -16,7 +16,8 @@ router.get('/', authenticate, async (req, res, next) => {
         ts.label as slot_label, ts.start_time, ts.end_time,
         approver.name as approved_by_name,
         rejecter.name as rejected_by_name,
-        EXISTS(SELECT 1 FROM usage_records ur WHERE ur.booking_id = b.id) as has_usage_record
+        EXISTS(SELECT 1 FROM usage_records ur WHERE ur.booking_id = b.id) as has_usage_record,
+        (SELECT gdrive_link FROM usage_records ur WHERE ur.booking_id = b.id) as gdrive_link
       FROM bookings b
       JOIN resources r ON b.resource_id = r.id
       JOIN users u ON b.user_id = u.id
@@ -89,6 +90,7 @@ router.get('/', authenticate, async (req, res, next) => {
             rejectedAt: row.rejected_at,
             rejectionReason: row.rejection_reason,
             hasUsageRecord: row.has_usage_record,
+            gdriveLink: row.gdrive_link,
             resource: {
                 id: row.resource_id,
                 name: row.resource_name,
@@ -181,14 +183,14 @@ router.post('/', authenticate, async (req, res, next) => {
     }
 });
 
-// PUT /api/bookings/:id/status - Approve/reject booking (admin/faculty)
-router.put('/:id/status', authenticate, authorize('admin', 'faculty'), async (req, res, next) => {
+// PUT /api/bookings/:id/status - Approve/reject booking (admin/faculty), or complete (anyone who owns it)
+router.put('/:id/status', authenticate, async (req, res, next) => {
     try {
         const { id } = req.params;
         const { status, reason } = req.body;
 
-        if (!['approved', 'rejected'].includes(status)) {
-            return res.status(400).json({ success: false, error: 'Status must be approved or rejected' });
+        if (!['approved', 'rejected', 'completed'].includes(status)) {
+            return res.status(400).json({ success: false, error: 'Status must be approved, rejected, or completed' });
         }
 
         // Get current booking
@@ -197,8 +199,18 @@ router.put('/:id/status', authenticate, authorize('admin', 'faculty'), async (re
             return res.status(404).json({ success: false, error: 'Booking not found' });
         }
 
-        if (existing.rows[0].status !== 'pending') {
+        if (status === 'completed' && existing.rows[0].status !== 'approved') {
+            return res.status(400).json({ success: false, error: 'Can only complete approved bookings' });
+        } else if (status !== 'completed' && existing.rows[0].status !== 'pending') {
             return res.status(400).json({ success: false, error: 'Can only approve/reject pending bookings' });
+        }
+
+        // Authorization logic
+        if (['approved', 'rejected'].includes(status) && !['admin', 'faculty'].includes(req.user.role)) {
+            return res.status(403).json({ success: false, error: 'Only admins/faculty can approve or reject bookings' });
+        }
+        if (status === 'completed' && req.user.role === 'user' && existing.rows[0].user_id !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'You can only complete your own bookings' });
         }
 
         let sql, params;
@@ -210,6 +222,14 @@ router.put('/:id/status', authenticate, authorize('admin', 'faculty'), async (re
         RETURNING *
       `;
             params = [req.user.id, id];
+        } else if (status === 'completed') {
+            sql = `
+        UPDATE bookings 
+        SET status = 'completed'
+        WHERE id = $1
+        RETURNING *
+      `;
+            params = [id];
         } else {
             sql = `
         UPDATE bookings 
