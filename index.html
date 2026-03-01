@@ -2,128 +2,177 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="College Resource Booking System - Login">
-  <title>Login | COET Ground Booking</title>
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/pages.css">
-  <link rel="stylesheet" href="css/theme-toggle.css">
-  <script src="js/theme.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View playground availability at COET - No login required">
+    <title>Public Calendar | COET Ground Booking</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/theme-toggle.css">
+    <script src="js/theme.js"></script>
 </head>
 
 <body>
-  <div class="login-page">
-    <button class="theme-toggle login-theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
-    <div class="login-container">
-      <div class="login-card">
-        <div class="login-header">
-          <div class="login-logo"><i class="fa-solid fa-landmark"></i></div>
-          <h1 class="login-title">Ground Booking</h1>
-          <p class="login-subtitle">Sign in to manage playground bookings</p>
+    <!-- Public Header -->
+    <header class="public-header">
+        <div class="public-logo">
+            <span style="font-size: 24px;"><i class="fa-solid fa-landmark"></i></span>
+            COET Ground Booking
+        </div>
+        <nav class="public-nav">
+            <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
+                        class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i
+                        class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
+            <a href="index.html" class="btn btn-ghost"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="login.html" class="btn btn-primary"><i class="fa-solid fa-lock"></i> Login to Book</a>
+        </nav>
+    </header>
+
+    <div class="public-content">
+        <div class="page-header text-center">
+            <h1 class="page-title">Playground Availability</h1>
+            <p class="page-subtitle">Check availability of college sports facilities - No login required</p>
         </div>
 
-        <div class="login-body">
-          <form id="login-form">
-            <div class="form-group">
-              <label class="form-label required" for="email">Email Address</label>
-              <input type="email" id="email" name="email" class="form-input" placeholder="your@email.edu" required>
-              <span class="form-error">Please enter a valid email</span>
+        <!-- Resource Selection -->
+        <div class="card mb-6">
+            <div class="card-body flex gap-4 items-end flex-wrap">
+                <div class="form-group" style="margin: 0; flex: 1; min-width: 200px;">
+                    <label class="form-label">Select Playground</label>
+                    <select id="resource-select" class="form-select">
+                        <option value="">All Playgrounds</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label">Select Date</label>
+                    <input type="date" id="date-select" class="form-input">
+                </div>
+                <button class="btn btn-primary" onclick="loadAvailability()">Check Availability</button>
             </div>
+        </div>
 
-            <div class="form-group">
-              <label class="form-label required" for="password">Password</label>
-              <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password"
-                required>
-              <span class="form-error">Password is required</span>
+        <!-- Resources Grid -->
+        <div id="resources-container" class="resource-grid">
+            <div class="text-center p-6" style="grid-column: 1/-1;">
+                <div class="spinner spinner-lg mx-auto"></div>
             </div>
+        </div>
 
-            <div class="form-group">
-              <div class="form-check">
-                <input type="checkbox" id="remember" class="form-check-input">
-                <label for="remember" class="form-check-label">Remember me</label>
+        <!-- Legend -->
+        <div class="card mt-6">
+            <div class="card-body flex gap-6 flex-wrap">
+                <div class="flex items-center gap-2">
+                    <div class="time-slot slot-available" style="padding: 4px 12px;">Available</div>
+                    <span class="text-sm text-secondary">Open for booking</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="time-slot slot-unavailable" style="padding: 4px 12px;">Booked</div>
+                    <span class="text-sm text-secondary">Already reserved</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Set default date
+        document.getElementById('date-select').value = Utils.getToday();
+        document.getElementById('date-select').min = Utils.getToday();
+
+        // Load resources
+        async function init() {
+            const select = document.getElementById('resource-select');
+
+            // Wait for resources from real API instead of MockData
+            const result = await API.getResources();
+            if (result.success) {
+                window.allResources = result.data.filter(r => r.status === 'available');
+                window.allResources.forEach(r => {
+                    const option = document.createElement('option');
+                    option.value = r.id;
+                    option.textContent = r.name;
+                    select.appendChild(option);
+                });
+            } else {
+                window.allResources = [];
+            }
+            loadAvailability();
+        }
+
+        async function loadAvailability() {
+            const container = document.getElementById('resources-container');
+            const date = document.getElementById('date-select').value;
+            const resourceId = document.getElementById('resource-select').value;
+
+            let resourcesToLoad = window.allResources || [];
+            if (resourceId) {
+                resourcesToLoad = resourcesToLoad.filter(r => r.id == resourceId);
+            }
+
+            if (resourcesToLoad.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon"><i class="fa-solid fa-futbol"></i></div>
+                        <div class="empty-state-title">No resources found</div>
+                        <div class="empty-state-description">No playgrounds match your selection.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show loading spinner while fetching complex availability arrays
+            container.innerHTML = '<div class="text-center p-6" style="grid-column: 1/-1;"><div class="spinner spinner-lg mx-auto"></div></div>';
+
+            try {
+                // Fetch availability states from Postgres for requested grounds simultaneously
+                const promises = resourcesToLoad.map(async (resource) => {
+                    const result = await API.checkAvailability(resource.id, date);
+                    return { resource, availability: result.success ? result.data : [] };
+                });
+
+                const results = await Promise.all(promises);
+
+                container.innerHTML = results.map(({ resource, availability }) => {
+                    // Build timeslot map dynamically from live Postgres payload
+                    const slotsHtml = availability.map(slot => {
+                        if (!slot.available) {
+                            return `<div class="time-slot slot-unavailable">${slot.label}</div>`;
+                        } else {
+                            return `<div class="time-slot slot-available">${slot.label}</div>`;
+                        }
+                    }).join('');
+
+                    return `
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">${resource.name}</h3>
+            </div>
+            <div class="card-body">
+              <p class="text-sm mb-4">Slots for ${Utils.formatDate(date)}:</p>
+              <div class="slot-grid" style="grid-template-columns: repeat(2, 1fr);">
+                ${slotsHtml}
               </div>
             </div>
-
-            <button type="submit" class="btn btn-primary btn-lg w-full" id="login-btn">
-              Sign In
-            </button>
-          </form>
-
-          <!-- Demo Credentials -->
-          <div
-            style="margin-top: var(--space-6); padding: var(--space-4); background: var(--color-gray-50); border-radius: var(--radius-md);">
-            <p class="text-sm font-semibold mb-2">Demo Credentials:</p>
-            <div class="text-xs text-secondary">
-              <p><strong>Admin:</strong> admin@coet.edu / admin123</p>
-              <p><strong>Faculty:</strong> faculty@coet.edu / faculty123</p>
-              <p><strong>User:</strong> user@coet.edu / user123</p>
+            <div class="card-footer flex justify-between items-center">
+              <a href="login.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-lock"></i> Login to Book</a>
+              <span class="text-xs text-secondary">Login required to book</span>
             </div>
           </div>
-        </div>
+        `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to parse API output for calendar:', error);
+                container.innerHTML = '<div class="text-danger p-6 text-center">Failed to load availability.</div>';
+            }
+        }
 
-        <div class="login-footer">
-          <a href="pages/forgot-password.html">Forgot your password?</a>
-          <span class="nav-sep"><i class="fa-solid fa-circle" style="font-size: 0.35em; vertical-align: middle;"></i></span>
-          <a href="pages/register.html">Create account</a>
-          <span class="nav-sep"><i class="fa-solid fa-circle" style="font-size: 0.35em; vertical-align: middle;"></i></span>
-          <a href="public/public-calendar.html">View Public Calendar</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="js/data.js"></script>
-  <script src="js/notifications.js"></script>
-  <script src="js/validators.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/utils.js"></script>
-  <script>
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('login-btn');
-
-      // Validate
-      if (!Validators.email(email)) {
-        Notifications.error('Invalid Email', 'Please enter a valid email address');
-        return;
-      }
-
-      if (!Validators.required(password)) {
-        Notifications.error('Password Required', 'Please enter your password');
-        return;
-      }
-
-      // Disable button
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Signing in...';
-
-      // Attempt login
-      const result = await AUTH.login(email, password);
-
-      btn.disabled = false;
-      btn.textContent = 'Sign In';
-
-      if (result.success) {
-        Notifications.success('Welcome!', `Logged in as ${result.data.name}`);
-        setTimeout(() => {
-          window.location.href = 'pages/dashboard.html';
-        }, 1000);
-      } else {
-        Notifications.error('Login Failed', result.error);
-      }
-    });
-
-    // If already logged in, redirect
-    if (AUTH.isAuthenticated()) {
-      window.location.href = 'pages/dashboard.html';
-    }
-  </script>
+        init();
+    </script>
 </body>
 
 </html>

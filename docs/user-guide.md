@@ -2,10 +2,9 @@
 
 ## Getting Started
 
-### Public Access
-Visit `public/public-calendar.html` to:
-- View playground availability
-- Submit booking requests (no login required)
+### 1. Viewing Public Availability
+Visit `index.html` to:
+- See all playgrounds and their availability status. Submit booking requests (no login required)
 
 ### Registered Users
 1. Open `index.html`

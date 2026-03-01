@@ -24,42 +24,50 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
-                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-chart-bar"></i></span>Dashboard</a>
-                    <a href="resources.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-futbol"></i></span>Resources</a>
-                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar</a>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-chart-bar"></i></span>Dashboard</a>
+                    <a href="resources.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-futbol"></i></span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-calendar-days"></i></span>Calendar</a>
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">Bookings</div>
-                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-plus"></i></span>New Booking</a>
-                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Bookings</a>
+                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-plus"></i></span>New Booking</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-clipboard-list"></i></span>My Bookings</a>
                 </div>
-                <div class="nav-section" data-role="faculty,admin">
+                <div class="nav-section" data-role="user,faculty,admin">
                     <div class="nav-section-title">Usage Management</div>
-                    <a href="usage-upload.html" class="nav-item" data-role="faculty,admin"><span
+                    <a href="usage-upload.html" class="nav-item" data-role="user,faculty,admin"><span
                             class="nav-item-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>Upload Usage</a>
                 </div>
                 <div class="nav-section" data-role="admin">
                     <div class="nav-section-title">Approval & Reports</div>
-                    <a href="approvals.html" class="nav-item" data-role="admin"><span
-                            class="nav-item-icon"><i class="fa-solid fa-check"></i></span>Approvals</a>
-                    <a href="reports.html" class="nav-item active" data-role="admin"><span
-                            class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>Reports</a>
+                    <a href="approvals.html" class="nav-item" data-role="admin"><span class="nav-item-icon"><i
+                                class="fa-solid fa-check"></i></span>Approvals</a>
+                    <a href="reports.html" class="nav-item active" data-role="admin"><span class="nav-item-icon"><i
+                                class="fa-solid fa-chart-line"></i></span>Reports</a>
                 </div>
             </nav>
             <div class="sidebar-footer">
-                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
-                        class="nav-item-icon"><i class="fa-solid fa-right-from-bracket"></i></span>Logout</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon"><i
+                            class="fa-solid fa-right-from-bracket"></i></span>Logout</a>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="navbar">
                 <div class="navbar-left">
-                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i
+                            class="fa-solid fa-bars"></i></button>
                     <h1 class="navbar-title">Reports</h1>
                 </div>
                 <div class="navbar-right">
-                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
+                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
+                                class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i
+                                class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
                     <button class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Export CSV</button>
                     <div class="navbar-user">
                         <div class="navbar-user-info">
@@ -117,12 +125,14 @@
                                         <th>Date</th>
                                         <th>Time Slot</th>
                                         <th>Status</th>
+                                        <th>Evidence</th>
                                         <th>Created</th>
+                                        <th class="text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="reports-table-body">
                                     <tr>
-                                        <td colspan="6" class="text-center p-6">
+                                        <td colspan="8" class="text-center p-6">
                                             <div class="spinner mx-auto"></div>
                                         </td>
                                     </tr>
@@ -140,8 +150,8 @@
     <script src="../js/validators.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/app.js"></script>
+    <script src="../js/api.js?v=2"></script>
+    <script src="../js/app.js?v=2"></script>
 </body>
 
 </html>

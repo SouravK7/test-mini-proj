@@ -154,7 +154,7 @@ router.post('/', authenticate, async (req, res, next) => {
         const conflict = await query(`
       SELECT id FROM bookings 
       WHERE resource_id = $1 AND booking_date = $2 AND slot_id = $3 
-        AND status IN ('pending', 'approved')
+        AND status IN ('pending', 'approved', 'completed')
     `, [resourceId, date, finalSlotId]);
 
         if (conflict.rows.length > 0) {
@@ -292,7 +292,7 @@ router.get('/availability/:resourceId/:date', optionalAuth, async (req, res, nex
         // Get booked slots for this resource and date
         const bookedResult = await query(`
       SELECT slot_id FROM bookings 
-      WHERE resource_id = $1 AND booking_date = $2 AND status IN ('pending', 'approved')
+      WHERE resource_id = $1 AND booking_date = $2 AND status IN ('pending', 'approved', 'completed')
     `, [resourceId, date]);
 
         const bookedSlotIds = bookedResult.rows.map(r => r.slot_id);

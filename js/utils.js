@@ -210,6 +210,53 @@ const Modal = {
                 }
             };
         });
+    },
+
+    // Prompt dialog for text input
+    prompt(options) {
+        return new Promise((resolve) => {
+            const { title, message, placeholder = '', confirmText = 'Submit', cancelText = 'Cancel' } = options;
+
+            const backdrop = Utils.createElement(`
+        <div class="modal-backdrop active" id="prompt-modal">
+          <div class="modal" style="max-width: 400px; padding: 24px;">
+            <div class="modal-header">
+              <h3 class="modal-title">${title}</h3>
+            </div>
+            <div class="modal-body">
+              <p style="margin-bottom: 12px; color: var(--text-secondary);">${message}</p>
+              <input type="text" id="prompt-input" class="form-input" placeholder="${placeholder}" autofocus style="width: 100%;">
+            </div>
+            <div class="modal-footer" style="margin-top: 20px;">
+              <button class="btn btn-secondary" id="prompt-cancel">${cancelText}</button>
+              <button class="btn btn-primary" id="prompt-ok">${confirmText}</button>
+            </div>
+          </div>
+        </div>
+      `);
+
+            document.body.appendChild(backdrop);
+            const input = backdrop.querySelector('#prompt-input');
+            input.focus();
+
+            backdrop.querySelector('#prompt-cancel').onclick = () => {
+                backdrop.remove();
+                resolve(null);
+            };
+
+            backdrop.querySelector('#prompt-ok').onclick = () => {
+                const val = input.value.trim();
+                backdrop.remove();
+                resolve(val);
+            };
+
+            backdrop.onclick = (e) => {
+                if (e.target === backdrop) {
+                    backdrop.remove();
+                    resolve(null);
+                }
+            };
+        });
     }
 };
 

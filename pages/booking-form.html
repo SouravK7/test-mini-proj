@@ -153,43 +153,51 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
-                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-chart-bar"></i></span>Dashboard</a>
-                    <a href="resources.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-futbol"></i></span>Resources</a>
-                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar</a>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-chart-bar"></i></span>Dashboard</a>
+                    <a href="resources.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-futbol"></i></span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-calendar-days"></i></span>Calendar</a>
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">Bookings</div>
-                    <a href="booking-form.html" class="nav-item active"><span class="nav-item-icon"><i class="fa-solid fa-plus"></i></span>New
+                    <a href="booking-form.html" class="nav-item active"><span class="nav-item-icon"><i
+                                class="fa-solid fa-plus"></i></span>New
                         Booking</a>
-                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon"><i class="fa-solid fa-clipboard-list"></i></span>My Bookings</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-clipboard-list"></i></span>My Bookings</a>
                 </div>
-                <div class="nav-section" data-role="faculty,admin">
+                <div class="nav-section" data-role="user,faculty,admin">
                     <div class="nav-section-title">Usage Management</div>
-                    <a href="usage-upload.html" class="nav-item" data-role="faculty,admin"><span
+                    <a href="usage-upload.html" class="nav-item" data-role="user,faculty,admin"><span
                             class="nav-item-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>Upload Usage</a>
                 </div>
                 <div class="nav-section" data-role="admin">
                     <div class="nav-section-title">Approval & Reports</div>
-                    <a href="approvals.html" class="nav-item" data-role="admin"><span
-                            class="nav-item-icon"><i class="fa-solid fa-check"></i></span>Approvals</a>
-                    <a href="reports.html" class="nav-item" data-role="admin"><span
-                            class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>Reports</a>
+                    <a href="approvals.html" class="nav-item" data-role="admin"><span class="nav-item-icon"><i
+                                class="fa-solid fa-check"></i></span>Approvals</a>
+                    <a href="reports.html" class="nav-item" data-role="admin"><span class="nav-item-icon"><i
+                                class="fa-solid fa-chart-line"></i></span>Reports</a>
                 </div>
             </nav>
             <div class="sidebar-footer">
-                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span
-                        class="nav-item-icon"><i class="fa-solid fa-right-from-bracket"></i></span>Logout</a>
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon"><i
+                            class="fa-solid fa-right-from-bracket"></i></span>Logout</a>
             </div>
         </aside>
 
         <main class="main-content">
             <header class="navbar">
                 <div class="navbar-left">
-                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i
+                            class="fa-solid fa-bars"></i></button>
                     <h1 class="navbar-title">New Booking Request</h1>
                 </div>
                 <div class="navbar-right">
-                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
+                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
+                                class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i
+                                class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
                     <div class="navbar-user">
                         <div class="navbar-user-info">
                             <div class="navbar-user-name">-</div>
@@ -221,6 +229,14 @@
                                 </div>
                                 <p id="preview-description" class="text-sm mt-3" style="color: var(--text-secondary);">
                                 </p>
+                                <div id="preview-rules-container" class="mt-4"
+                                    style="display: none; background: var(--color-danger-50); border-left: 3px solid var(--color-danger); padding: var(--space-3); border-radius: var(--radius-sm);">
+                                    <h5 class="text-sm font-semibold mb-2" style="color: var(--color-danger);"><i
+                                            class="fa-solid fa-triangle-exclamation"></i> Facility Rules</h5>
+                                    <ul id="preview-rules"
+                                        style="padding-left: 20px; font-size: 0.875rem; color: var(--color-danger); list-style-type: disc;">
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -288,7 +304,8 @@
                                         </div>
                                     </div>
                                     <p class="text-xs text-secondary mt-2" id="custom-time-note" style="display: none;">
-                                        <i class="fa-solid fa-triangle-exclamation"></i> Custom time requests require special approval and may take longer to process.
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Custom time requests require
+                                        special approval and may take longer to process.
                                     </p>
                                 </div>
                             </div>
@@ -415,6 +432,16 @@
                 document.getElementById('preview-name').textContent = currentResource.name;
                 document.getElementById('preview-status').innerHTML = '<i class="fa-solid fa-check"></i> ' + Utils.capitalize(currentResource.status);
                 document.getElementById('preview-description').textContent = currentResource.description;
+
+                const rulesContainer = document.getElementById('preview-rules-container');
+                const rulesList = document.getElementById('preview-rules');
+                if (currentResource.rules && currentResource.rules.length > 0) {
+                    rulesList.innerHTML = currentResource.rules.map(r => `<li>${r}</li>`).join('');
+                    rulesContainer.style.display = 'block';
+                } else {
+                    rulesContainer.style.display = 'none';
+                }
+
                 preview.classList.add('active');
             }
         }
@@ -537,7 +564,10 @@
             // Create booking via API
             const result = await API.createBooking({
                 resourceId: parseInt(resourceSelect.value),
-                slotId: selectedSlots[0], // Use first selected slot
+                slotId: useCustom ? undefined : selectedSlots[0], // Use first selected preset slot if not custom
+                isCustom: useCustom,
+                customStart: useCustom ? customStart : null,
+                customEnd: useCustom ? customEnd : null,
                 date: dateInput.value,
                 purpose: purpose
             });

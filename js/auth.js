@@ -96,7 +96,7 @@ const AUTH = {
     // Logout
     logout() {
         localStorage.removeItem(this.STORAGE_KEY);
-        window.location.href = '../index.html';
+        window.location.href = '../login.html';
     },
 
     // Get current user
@@ -134,7 +134,7 @@ const AUTH = {
     // Require authentication (redirect if not logged in)
     requireAuth() {
         if (!this.isAuthenticated()) {
-            window.location.href = '../index.html';
+            window.location.href = '../login.html';
             return false;
         }
         return true;

@@ -1,10 +1,10 @@
 # Setup Instructions
 
-## Quick Start
+## Running the Frontend
 
-1. **Extract/Clone** the project folder
-2. **Open** `public/public-calendar.html` in browser (no login needed)
-3. For authenticated access: Open `index.html` and login
+1. Simply drag and drop `index.html` into your web browser OR
+2. **Open** `index.html` in browser (no login needed for Public Calendar)
+3. For authenticated access: Navigate to the `login.html` link (or click "Login to Book")
 
 ## Demo Credentials
 
@@ -18,11 +18,12 @@
 
 ```
 Resource Management Project/
-├── index.html          # Login page
+├── index.html          # Public Calendar (entry point)
+├── login.html          # Login page
 ├── css/                # Stylesheets
 ├── js/                 # JavaScript files
 ├── pages/              # Authenticated pages
-├── public/             # Public access pages
+├── public/             
 └── docs/               # Documentation
 ```
 

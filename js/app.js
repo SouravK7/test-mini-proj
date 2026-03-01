@@ -313,6 +313,13 @@ const App = {
         if (amenitiesList && resource.amenities) {
             amenitiesList.innerHTML = resource.amenities.map(a => `<li><i class="fa-solid fa-check"></i> ${a}</li>`).join('');
         }
+
+        const rulesList = document.getElementById('resource-rules');
+        if (rulesList && resource.rules && resource.rules.length > 0) {
+            rulesList.innerHTML = resource.rules.map(r => `<li>${r}</li>`).join('');
+        } else if (rulesList) {
+            rulesList.innerHTML = '<li>No specific rules posted.</li>';
+        }
     },
 
     async loadResourceAvailability(resourceId, date) {
@@ -339,135 +346,9 @@ const App = {
         });
     },
 
-    // Booking form
-    async initBookingForm() {
-        const resourceId = Utils.getUrlParam('resource');
-        const date = Utils.getUrlParam('date');
-        const slotId = Utils.getUrlParam('slot');
-
-        // Pre-fill form if params exist
-        if (resourceId) {
-            const resourceSelect = document.getElementById('resource-select');
-            if (resourceSelect) resourceSelect.value = resourceId;
-        }
-        if (date) {
-            const dateInput = document.getElementById('booking-date');
-            if (dateInput) dateInput.value = date;
-        }
-
-        // Load resources for dropdown
-        await this.loadResourceOptions();
-
-        // Load slots when date changes
-        const dateInput = document.getElementById('booking-date');
-        const resourceSelect = document.getElementById('resource-select');
-
-        const loadSlots = async () => {
-            if (resourceSelect?.value && dateInput?.value) {
-                await this.loadBookingSlots(resourceSelect.value, dateInput.value, slotId);
-            }
-        };
-
-        dateInput?.addEventListener('change', loadSlots);
-        resourceSelect?.addEventListener('change', loadSlots);
-
-        // Initial load if both values present
-        if (resourceId && date) {
-            await loadSlots();
-        }
-
-        // Form submission
-        const form = document.getElementById('booking-form');
-        form?.addEventListener('submit', (e) => this.handleBookingSubmit(e));
-    },
-
-    async loadResourceOptions() {
-        const select = document.getElementById('resource-select');
-        if (!select) return;
-
-        const result = await API.getResources({ status: 'available' });
-        if (!result.success) return;
-
-        const currentValue = select.value;
-        select.innerHTML = '<option value="">Select a resource</option>' +
-            result.data.map(r => `<option value="${r.id}" ${r.id == currentValue ? 'selected' : ''}>${r.name}</option>`).join('');
-    },
-
-    async loadBookingSlots(resourceId, date, preselectedSlot = null) {
-        const container = document.getElementById('slot-container');
-        if (!container) return;
-
-        const result = await API.checkAvailability(resourceId, date);
-        if (!result.success) return;
-
-        container.innerHTML = `
-      <label class="form-label required">Select Time Slot</label>
-      <div class="slot-grid" id="time-slots">
-        ${result.data.map(slot => `
-          <div class="time-slot ${slot.available ? 'slot-available' : 'slot-unavailable'} ${slot.id == preselectedSlot ? 'slot-selected' : ''}" 
-               data-slot-id="${slot.id}" 
-               data-available="${slot.available}">
-            ${slot.label}
-          </div>
-        `).join('')}
-      </div>
-      <input type="hidden" name="slotId" id="slot-input" value="${preselectedSlot || ''}">
-    `;
-
-        // Slot selection
-        container.querySelectorAll('.time-slot.slot-available').forEach(el => {
-            el.addEventListener('click', () => {
-                container.querySelectorAll('.time-slot').forEach(s => s.classList.remove('slot-selected'));
-                el.classList.add('slot-selected');
-                document.getElementById('slot-input').value = el.dataset.slotId;
-            });
-        });
-    },
-
-    async handleBookingSubmit(e) {
-        e.preventDefault();
-
-        const form = e.target;
-        const rules = {
-            'resource-select': [{ type: 'required', message: 'Please select a resource' }],
-            'booking-date': [{ type: 'required' }, { type: 'futureDate' }],
-            'purpose': [{ type: 'required' }, { type: 'minLength', value: 10, message: 'Please provide more details (min 10 characters)' }]
-        };
-
-        if (!FormValidator.validateForm(form, rules)) return;
-
-        const slotId = document.getElementById('slot-input')?.value;
-        if (!slotId) {
-            Notifications.error('Error', 'Please select a time slot');
-            return;
-        }
-
-        const user = AUTH.getCurrentUser();
-        const data = {
-            resourceId: form.querySelector('#resource-select').value,
-            date: form.querySelector('#booking-date').value,
-            slotId: slotId,
-            purpose: form.querySelector('#purpose').value,
-            userId: user?.id
-        };
-
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
-
-        const result = await API.createBooking(data);
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Booking Request';
-
-        if (result.success) {
-            Notifications.success('Success', 'Booking request submitted successfully!');
-            setTimeout(() => {
-                window.location.href = 'my-bookings.html';
-            }, 1500);
-        } else {
-            Notifications.error('Error', result.error || 'Failed to submit booking');
-        }
+    // Booking form logic is completely handled inline in pages/booking-form.html
+    initBookingForm() {
+        // Leaving stub to prevent errors in pageInits mapping
     },
 
     // My bookings page
@@ -486,14 +367,14 @@ const App = {
 
         const result = await API.getBookings(filters);
         if (!result.success) {
-            container.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-danger">Failed to load bookings. ${result.error || ''}</td></tr>`;
+            container.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-danger">Failed to load bookings. ${result.error || ''}</td></tr>`;
             return;
         }
 
         if (result.data.length === 0) {
             container.innerHTML = `
         <tr>
-          <td colspan="6" class="text-center p-6">
+          <td colspan="8" class="text-center p-6">
             <div class="empty-state-icon"><i class="fa-solid fa-calendar-days"></i></div>
             <p>No bookings found</p>
           </td>
@@ -506,11 +387,22 @@ const App = {
       <tr>
         <td>${b.resource?.name || 'Unknown'}</td>
         <td>${Utils.formatDate(b.date)}</td>
-        <td>${b.slot?.label || ''}</td>
-        <td>${Utils.truncate(b.purpose, 40)}</td>
+        <td class="whitespace-nowrap">${b.slot?.label || ''}</td>
+        <td>
+            <div title="${Utils.escapeHtml(b.purpose)}">${Utils.truncate(b.purpose, 40)}</div>
+        </td>
         <td>${Utils.getStatusBadge(b.status)}</td>
         <td>
-          ${b.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="App.cancelBooking(${b.id})">Cancel</button>` : ''}
+            ${b.status === 'rejected' && b.rejectionReason ? Utils.escapeHtml(b.rejectionReason) : '<span class="text-muted">-</span>'}
+        </td>
+        <td>
+            ${b.status === 'completed'
+                ? (b.hasUsageRecord ? '<span class="badge badge-success">Submitted</span>' : '<span class="badge badge-warning">Pending</span>')
+                : '<span class="text-muted">-</span>'}
+        </td>
+        <td>
+            ${b.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="App.cancelBooking(${b.id})">Cancel</button>` : ''}
+            ${b.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
         </td>
       </tr>
     `).join('');
@@ -611,7 +503,15 @@ const App = {
     },
 
     async rejectBooking(id) {
-        const reason = prompt('Enter rejection reason (optional):');
+        const reason = await Modal.prompt({
+            title: 'Reject Booking',
+            message: 'Please provide a reason for rejecting this booking request:',
+            placeholder: 'Reason for rejection (optional)',
+            confirmText: 'Reject'
+        });
+
+        // User clicked cancel
+        if (reason === null) return;
 
         const result = await API.updateBookingStatus(id, 'rejected', reason);
         if (result.success) {
@@ -619,6 +519,28 @@ const App = {
             this.loadPendingApprovals();
         } else {
             Notifications.error('Error', result.error || 'Failed to reject');
+        }
+    },
+
+    async completeBooking(id) {
+        const confirmed = await Modal.confirm({
+            title: 'Mark Completed',
+            message: 'Are you sure you want to mark this booking as thoroughly completed?',
+            confirmText: 'Mark Completed',
+            type: 'success'
+        });
+        if (!confirmed) return;
+
+        const result = await API.updateBookingStatus(id, 'completed', null);
+        if (result.success) {
+            Notifications.success('Completed', 'Booking marked as completed');
+            if (this.getCurrentPage() === 'my-bookings') {
+                this.loadMyBookings();
+            } else {
+                this.loadReportsData();
+            }
+        } else {
+            Notifications.error('Error', result.error || 'Failed to complete booking');
         }
     },
 
@@ -664,7 +586,7 @@ const App = {
 
     // Usage upload
     initUsageUpload() {
-        if (!AUTH.hasRole(['admin', 'faculty'])) {
+        if (!AUTH.hasRole(['admin', 'faculty', 'user'])) {
             window.location.href = 'dashboard.html';
             return;
         }
@@ -677,7 +599,7 @@ const App = {
         const select = document.getElementById('booking-select');
         if (!select) return;
 
-        const result = await API.getBookings({ status: 'approved' });
+        const result = await API.getBookings({ status: 'completed' });
         if (!result.success) return;
 
         select.innerHTML = '<option value="">Select a booking</option>' +
@@ -735,15 +657,31 @@ const App = {
     initReports() {
         if (!AUTH.requireRole('admin')) return;
         this.loadReportsData();
+
+        const exportBtn = document.querySelector('button .fa-download')?.parentElement;
+        if (exportBtn) {
+            exportBtn.onclick = () => this.exportReportsCSV();
+        }
     },
 
     async loadReportsData() {
         const container = document.getElementById('reports-table-body');
         if (!container) return;
 
-        const result = await API.getBookings({});
+        // Fetch filter values
+        const filters = {};
+        const startDate = document.getElementById('date-from')?.value;
+        if (startDate) filters.startDate = startDate;
+
+        const endDate = document.getElementById('date-to')?.value;
+        if (endDate) filters.endDate = endDate;
+
+        const status = document.getElementById('report-status')?.value;
+        if (status) filters.status = status;
+
+        const result = await API.getBookings(filters);
         if (!result.success) {
-            container.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-danger">Failed to load reports. ${result.error || ''}</td></tr>`;
+            container.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-danger">Failed to load reports. ${result.error || ''}</td></tr>`;
             return;
         }
 
@@ -754,9 +692,80 @@ const App = {
         <td>${Utils.formatDate(b.date)}</td>
         <td>${b.slot?.label || ''}</td>
         <td>${Utils.getStatusBadge(b.status)}</td>
+        <td>
+          ${['rejected', 'cancelled', 'approved'].includes(b.status)
+                ? '<span class="text-muted text-sm" style="color: var(--text-muted);">-</span>'
+                : b.gdriveLink
+                    ? `<a href="${Utils.escapeHtml(b.gdriveLink)}" target="_blank" class="btn btn-ghost btn-sm" title="View Evidence on GDrive"><i class="fa-brands fa-google-drive" style="color: #0F9D58; margin-right: 4px;"></i> View Link</a>`
+                    : '<span class="text-muted text-sm" style="color: var(--text-muted);">Not Submitted</span>'}
+        </td>
         <td>${Utils.timeAgo(b.createdAt)}</td>
+        <td class="text-right">
+          ${b.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
+        </td>
       </tr>
     `).join('');
+    },
+
+    async exportReportsCSV() {
+        // Fetch filter values
+        const filters = {};
+        const startDate = document.getElementById('date-from')?.value;
+        if (startDate) filters.startDate = startDate;
+
+        const endDate = document.getElementById('date-to')?.value;
+        if (endDate) filters.endDate = endDate;
+
+        const status = document.getElementById('report-status')?.value;
+        if (status) filters.status = status;
+
+        const result = await API.getBookings(filters);
+        if (!result.success || !result.data || result.data.length === 0) {
+            Notifications.error('Export Error', 'No data available to export');
+            return;
+        }
+
+        // CSV Headers
+        const headers = ['Booking ID', 'Resource Name', 'User Name', 'User Email', 'Booking Date', 'Time Slot', 'Purpose', 'Status', 'Evidence Link', 'Created At'];
+
+        // Escape helper for CSV data
+        const escapeCSV = (str) => {
+            if (str === null || str === undefined) return '""';
+            const escaped = String(str).replace(/"/g, '""');
+            return `"${escaped}"`;
+        };
+
+        // CSV Rows
+        const rows = result.data.map(b => [
+            escapeCSV(b.id),
+            escapeCSV(b.resource?.name),
+            escapeCSV(b.user?.name),
+            escapeCSV(b.user?.email),
+            escapeCSV(Utils.formatDate(b.date)),
+            escapeCSV(b.slot?.label),
+            escapeCSV(b.purpose),
+            escapeCSV(b.status),
+            escapeCSV(b.gdriveLink || ''),
+            escapeCSV(new Date(b.createdAt).toLocaleString())
+        ].join(','));
+
+        const csvContent = [headers.join(','), ...rows].join('\n');
+
+        // Create a downloadable blob
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        link.setAttribute('href', url);
+        link.setAttribute('download', `bookings_report_${timestamp}.csv`);
+        link.style.display = 'none';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        Notifications.success('Success', 'Report exported as CSV');
     }
 };
 
@@ -768,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!publicPages.includes(currentPage)) {
         if (!AUTH.isAuthenticated()) {
-            window.location.href = '../index.html';
+            window.location.href = '../login.html';
             return;
         }
     }

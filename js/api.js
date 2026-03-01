@@ -88,6 +88,8 @@ const API = {
         if (filters.resourceId) params.append('resourceId', filters.resourceId);
         if (filters.status) params.append('status', filters.status);
         if (filters.date) params.append('date', filters.date);
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
 
         const queryString = params.toString();
         return this.request(`/api/bookings${queryString ? '?' + queryString : ''}`);
