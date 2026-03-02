@@ -88,11 +88,14 @@
             <!-- Navbar -->
             <header class="navbar">
                 <div class="navbar-left">
-                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i
+                            class="fa-solid fa-bars"></i></button>
                     <h1 class="navbar-title">Dashboard</h1>
                 </div>
                 <div class="navbar-right">
-                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
+                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
+                                class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i
+                                class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
                     <div class="dropdown">
                         <div class="navbar-user" data-dropdown>
                             <div class="navbar-user-info">
@@ -102,9 +105,11 @@
                             <div class="avatar">--</div>
                         </div>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="my-bookings.html"><i class="fa-solid fa-clipboard-list"></i> My Bookings</a>
+                            <a class="dropdown-item" href="my-bookings.html"><i class="fa-solid fa-clipboard-list"></i>
+                                My Bookings</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="javascript:void(0)" onclick="AUTH.logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                            <a class="dropdown-item" href="javascript:void(0)" onclick="AUTH.logout()"><i
+                                    class="fa-solid fa-right-from-bracket"></i> Logout</a>
                         </div>
                     </div>
                 </div>
@@ -121,25 +126,29 @@
                 <div class="stats-grid" id="stats-section">
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--color-primary-100); color: var(--color-primary);"><i class="fa-solid fa-futbol"></i></div>
+                            style="background: var(--color-primary-100); color: var(--color-primary);"><i
+                                class="fa-solid fa-futbol"></i></div>
                         <div class="stat-value" data-stat="totalResources">-</div>
                         <div class="stat-label">Total Resources</div>
                     </div>
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-calendar-days"></i></div>
+                            style="background: var(--color-success-bg); color: var(--color-success);"><i
+                                class="fa-solid fa-calendar-days"></i></div>
                         <div class="stat-value" data-stat="bookingsToday">-</div>
                         <div class="stat-label">Bookings Today</div>
                     </div>
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--color-warning-bg); color: var(--color-warning);"><i class="fa-solid fa-hourglass-half"></i></div>
+                            style="background: var(--color-warning-bg); color: var(--color-warning);"><i
+                                class="fa-solid fa-hourglass-half"></i></div>
                         <div class="stat-value" data-stat="pendingApprovals">-</div>
                         <div class="stat-label">Pending Approvals</div>
                     </div>
                     <div class="card stat-card">
                         <div class="stat-icon"
-                            style="background: var(--status-completed-bg); color: var(--status-completed);"><i class="fa-solid fa-check"></i></div>
+                            style="background: var(--status-completed-bg); color: var(--status-completed);"><i
+                                class="fa-solid fa-check"></i></div>
                         <div class="stat-value" data-stat="completedThisMonth">-</div>
                         <div class="stat-label">Completed This Month</div>
                     </div>
@@ -150,7 +159,8 @@
                     <div class="card">
                         <div class="card-header flex justify-between items-center">
                             <h3 class="card-title">Recent Bookings</h3>
-                            <a href="my-bookings.html" class="btn btn-ghost btn-sm">View All</a>
+                            <a href="my-bookings.html" id="dashboard-view-all-btn" class="btn btn-ghost btn-sm">View
+                                All</a>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-container" style="border: none; border-radius: 0;">

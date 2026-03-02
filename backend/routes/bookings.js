@@ -130,35 +130,49 @@ router.post('/', authenticate, async (req, res, next) => {
         }
 
         let finalSlotId = slotId;
+        let reqStart, reqEnd;
 
         if (isCustom) {
             if (!customStart || !customEnd) {
                 return res.status(400).json({ success: false, error: 'customStart and customEnd are required for custom bookings' });
             }
+            reqStart = `${customStart}:00`;
+            reqEnd = `${customEnd}:00`;
             const customLabel = `Custom: ${customStart} - ${customEnd}`;
             // Check if this exact custom slot already exists
-            const existingSlot = await query('SELECT id FROM time_slots WHERE label = $1 AND start_time = $2 AND end_time = $3', [customLabel, `${customStart}:00`, `${customEnd}:00`]);
+            const existingSlot = await query('SELECT id FROM time_slots WHERE label = $1 AND start_time = $2 AND end_time = $3', [customLabel, reqStart, reqEnd]);
 
             if (existingSlot.rows.length > 0) {
                 finalSlotId = existingSlot.rows[0].id;
             } else {
                 // Create a new time slot dynamically, setting is_active=false so it doesn't pollute the generic preset list
-                const newSlot = await query('INSERT INTO time_slots (label, start_time, end_time, is_active) VALUES ($1, $2, $3, false) RETURNING id', [customLabel, `${customStart}:00`, `${customEnd}:00`]);
+                const newSlot = await query('INSERT INTO time_slots (label, start_time, end_time, is_active) VALUES ($1, $2, $3, false) RETURNING id', [customLabel, reqStart, reqEnd]);
                 finalSlotId = newSlot.rows[0].id;
             }
         } else if (!finalSlotId) {
             return res.status(400).json({ success: false, error: 'slotId is required for preset bookings' });
+        } else {
+            // Get preset slot times
+            const presetSlot = await query('SELECT start_time, end_time FROM time_slots WHERE id = $1', [finalSlotId]);
+            if (presetSlot.rows.length === 0) {
+                return res.status(400).json({ success: false, error: 'Invalid slotId' });
+            }
+            reqStart = presetSlot.rows[0].start_time;
+            reqEnd = presetSlot.rows[0].end_time;
         }
 
-        // Check for conflicts
+        // Check for conflicts (overlap logic)
         const conflict = await query(`
-      SELECT id FROM bookings 
-      WHERE resource_id = $1 AND booking_date = $2 AND slot_id = $3 
-        AND status IN ('pending', 'approved', 'completed')
-    `, [resourceId, date, finalSlotId]);
+      SELECT b.id 
+      FROM bookings b
+      JOIN time_slots ts ON b.slot_id = ts.id
+      WHERE b.resource_id = $1 AND b.booking_date = $2 
+        AND b.status IN ('pending', 'approved', 'completed')
+        AND (ts.start_time < $4 AND ts.end_time > $3)
+    `, [resourceId, date, reqStart, reqEnd]);
 
         if (conflict.rows.length > 0) {
-            return res.status(409).json({ success: false, error: 'This specific time slot is already booked' });
+            return res.status(409).json({ success: false, error: 'This time period overlaps with an existing booking' });
         }
 
         // Check if resource exists and is available
@@ -286,24 +300,32 @@ router.get('/availability/:resourceId/:date', optionalAuth, async (req, res, nex
     try {
         const { resourceId, date } = req.params;
 
-        // Get all time slots
+        // Get all active preset time slots
         const slotsResult = await query('SELECT * FROM time_slots WHERE is_active = true ORDER BY start_time');
 
-        // Get booked slots for this resource and date
+        // Get all booked slots (including their times) for this resource and date
         const bookedResult = await query(`
-      SELECT slot_id FROM bookings 
-      WHERE resource_id = $1 AND booking_date = $2 AND status IN ('pending', 'approved', 'completed')
+      SELECT b.slot_id, ts.start_time, ts.end_time 
+      FROM bookings b
+      JOIN time_slots ts ON b.slot_id = ts.id
+      WHERE b.resource_id = $1 AND b.booking_date = $2 AND b.status IN ('pending', 'approved', 'completed')
     `, [resourceId, date]);
 
-        const bookedSlotIds = bookedResult.rows.map(r => r.slot_id);
+        const bookedSlots = bookedResult.rows;
 
-        const slots = slotsResult.rows.map(slot => ({
-            id: slot.id,
-            label: slot.label,
-            start: slot.start_time,
-            end: slot.end_time,
-            available: !bookedSlotIds.includes(slot.id)
-        }));
+        const slots = slotsResult.rows.map(slot => {
+            const isOverlapping = bookedSlots.some(booked => {
+                return slot.start_time < booked.end_time && slot.end_time > booked.start_time;
+            });
+
+            return {
+                id: slot.id,
+                label: slot.label,
+                start: slot.start_time,
+                end: slot.end_time,
+                available: !isOverlapping
+            };
+        });
 
         res.json({ success: true, data: slots });
     } catch (error) {

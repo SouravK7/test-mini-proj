@@ -633,6 +633,17 @@
     .login-body {
         padding: var(--space-6);
     }
+
+    .public-header {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .public-nav {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 }
 
 @media (max-width: 480px) {
@@ -640,7 +651,15 @@
         padding: var(--space-4);
     }
 
+    .public-content {
+        padding: var(--space-4);
+    }
+
     .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .resource-grid {
         grid-template-columns: 1fr;
     }
 }

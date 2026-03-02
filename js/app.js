@@ -152,6 +152,12 @@ const App = {
             if (result.success) {
                 this.updateDashboardStats(result.data);
             }
+
+            // Redirect "View All" to reports page which lists all bookings
+            const viewAllBtn = document.getElementById('dashboard-view-all-btn');
+            if (viewAllBtn) {
+                viewAllBtn.href = 'reports.html';
+            }
         }
 
         // Load recent bookings
@@ -596,16 +602,7 @@ const App = {
     },
 
     async loadCompletedBookingsForUpload() {
-        const select = document.getElementById('booking-select');
-        if (!select) return;
-
-        const result = await API.getBookings({ status: 'completed' });
-        if (!result.success) return;
-
-        select.innerHTML = '<option value="">Select a booking</option>' +
-            result.data.map(b => `
-        <option value="${b.id}">${b.resource?.name} - ${Utils.formatDate(b.date)} (${b.slot?.label})</option>
-      `).join('');
+        // Handled by inline script in usage-upload.html
     },
 
     setupFileUpload() {

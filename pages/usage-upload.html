@@ -18,7 +18,8 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <div class="sidebar-logo-icon"><i class="fa-solid fa-landmark"></i></div><span>Resource Booking</span>
+                    <div class="sidebar-logo-icon"><i class="fa-solid fa-landmark"></i></div><span>Resource
+                        Booking</span>
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -145,24 +146,24 @@
 
             // Fetch bookings. If user is a student, API automatically filters to only their bookings.
             // If admin/faculty, they will get all bookings, so we should allow them to see them.
-            const result = await API.getBookings({ status: 'approved' });
+            const result = await API.getBookings({ status: 'completed' });
 
             if (result.success && result.data.length > 0) {
                 const availableBookings = result.data.filter(b => !b.hasUsageRecord);
 
                 if (availableBookings.length > 0) {
-                    selectEl.innerHTML = '<option value="">Select an approved booking...</option>';
+                    selectEl.innerHTML = '<option value="">Select a completed booking...</option>';
                     availableBookings.forEach(b => {
                         const date = new Date(b.date).toLocaleDateString();
                         selectEl.innerHTML += `<option value="${b.id}">${b.resource.name} - ${date} (${b.slot.label}) booked by ${b.user.name}</option>`;
                     });
                 } else {
-                    selectEl.innerHTML = '<option value="">All approved bookings already have a usage record recorded</option>';
+                    selectEl.innerHTML = '<option value="">All completed bookings already have a usage record recorded</option>';
                     selectEl.disabled = true;
                     document.getElementById('usage-form').querySelector('button[type="submit"]').disabled = true;
                 }
             } else {
-                selectEl.innerHTML = '<option value="">No approved bookings found</option>';
+                selectEl.innerHTML = '<option value="">No completed bookings found</option>';
                 selectEl.disabled = true;
                 document.getElementById('usage-form').querySelector('button[type="submit"]').disabled = true;
             }

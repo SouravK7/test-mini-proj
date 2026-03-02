@@ -334,6 +334,8 @@ select.form-select option {
 /* ---- TABLES ---- */
 .table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
     border: none;
     border-radius: var(--radius-lg);
 }
@@ -813,4 +815,22 @@ select.form-select option {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 480px) {
+    .modal-body {
+        padding: var(--space-4);
+    }
+
+    .modal-header,
+    .modal-footer {
+        padding: var(--space-4);
+    }
+
+    .toast-container {
+        left: var(--space-4);
+        right: var(--space-4);
+        max-width: none;
+    }
 }
