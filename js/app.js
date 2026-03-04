@@ -128,7 +128,8 @@ const App = {
             'calendar': () => this.initCalendar(),
             'approvals': () => this.initApprovals(),
             'usage-upload': () => this.initUsageUpload(),
-            'reports': () => this.initReports()
+            'reports': () => this.initReports(),
+            'report-details': () => this.initReportDetails()
         };
 
         const init = pageInits[this.currentPage];
@@ -698,7 +699,14 @@ const App = {
         </td>
         <td>${Utils.timeAgo(b.createdAt)}</td>
         <td class="text-right">
-          ${b.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
+          <div style="display: grid; grid-template-columns: 120px 140px; gap: 8px; justify-content: flex-end; align-items: center;">
+            <div style="text-align: right;">
+              <a href="report-details.html?id=${b.id}" class="btn btn-secondary btn-sm" style="width: 100%;"><i class="fa-solid fa-eye"></i> View Details</a>
+            </div>
+            <div style="text-align: left;">
+              ${b.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})" style="width: 100%;">Mark Completed</button>` : ''}
+            </div>
+          </div>
         </td>
       </tr>
     `).join('');
@@ -763,6 +771,158 @@ const App = {
         document.body.removeChild(link);
 
         Notifications.success('Success', 'Report exported as CSV');
+    },
+
+    // Report Details page
+    async initReportDetails() {
+        if (!AUTH.requireRole('admin')) return;
+
+        const id = Utils.getUrlParam('id');
+        if (!id) {
+            window.location.href = 'reports.html';
+            return;
+        }
+
+        const container = document.getElementById('report-details-container');
+        if (!container) return;
+
+        try {
+            // First we need to get the booking data.
+            const bookingResult = await API.getBookingById(id);
+            if (!bookingResult.success) throw new Error(bookingResult.error || 'Failed to fetch booking');
+
+            const booking = bookingResult.data;
+
+            // Then get usage records for this booking
+            const usageResult = await API.getUsageRecords({ bookingId: id });
+            const usageRecords = usageResult.success ? usageResult.data : [];
+            const usageRecord = usageRecords.length > 0 ? usageRecords[0] : null;
+
+            this.renderReportDetails(booking, usageRecord);
+        } catch (error) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon text-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="empty-state-title">Error Loading Details</div>
+                    <div class="empty-state-description">${error.message || 'An unknown error occurred'}</div>
+                    <a href="reports.html" class="btn btn-primary mt-4">Back to Reports</a>
+                </div>
+            `;
+        }
+    },
+
+    renderReportDetails(booking, usageRecord) {
+        const template = document.getElementById('report-details-template');
+        const container = document.getElementById('report-details-container');
+
+        if (!template || !container) return;
+
+        // Clone template content
+        const clone = template.content.cloneNode(true);
+
+        // Update Status badge in header
+        const statusBadgeContainer = document.getElementById('booking-status-badge');
+        if (statusBadgeContainer) {
+            statusBadgeContainer.innerHTML = Utils.getStatusBadge(booking.status);
+        }
+
+        // Populate standard booking details
+        clone.getElementById('detail-booking-id').textContent = `#${booking.id}`;
+        clone.getElementById('detail-date').textContent = Utils.formatDate(booking.date);
+        clone.getElementById('detail-slot').textContent = booking.slot?.label || '-';
+        clone.getElementById('detail-created-at').textContent = new Date(booking.createdAt).toLocaleString();
+
+        // Resource details
+        clone.getElementById('detail-resource-name').textContent = booking.resource?.name || '-';
+        clone.getElementById('detail-resource-location').textContent = booking.resource?.location || '-';
+        clone.getElementById('detail-purpose').textContent = booking.purpose || '-';
+
+        // User details
+        clone.getElementById('detail-user-name').textContent = booking.user?.name || '-';
+        clone.getElementById('detail-user-email').textContent = booking.user?.email || '-';
+        clone.getElementById('detail-user-role').textContent = booking.user?.role || '-';
+
+        // Usage Report Section
+        const usageSection = clone.getElementById('usage-report-section');
+        if (usageRecord) {
+            usageSection.innerHTML = `
+                <div class="detail-group">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value text-success"><i class="fa-solid fa-check-circle"></i> Output Submitted</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Submitted On</div>
+                    <div class="detail-value">${new Date(usageRecord.uploaded_at || usageRecord.uploadedAt || new Date()).toLocaleString()}</div>
+                </div>
+                
+                <div class="report-section mt-4 pt-4 border-t" style="border-top: 1px solid var(--border-color);">
+                    <div class="detail-label mb-2">Remarks / Feedback</div>
+                    <div class="p-4 bg-light rounded" style="background-color: var(--surface-bg); border: 1px solid var(--border-color); white-space: pre-wrap;">${Utils.escapeHtml(usageRecord.remarks || 'No remarks provided.')}</div>
+                </div>
+                
+                ${usageRecord.issues ? `
+                <div class="report-section mt-4">
+                    <div class="detail-label mb-2 text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Reported Issues</div>
+                    <div class="p-4 rounded" style="background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; white-space: pre-wrap;">${Utils.escapeHtml(usageRecord.issues)}</div>
+                </div>
+                ` : ''}
+                
+                ${usageRecord.gdrive_link || usageRecord.gdriveLink || booking.gdriveLink ? `
+                <div class="report-section mt-4 pt-4 border-t" style="border-top: 1px solid var(--border-color);">
+                    <div class="detail-label mb-2">Evidence / Media Link</div>
+                    <a href="${Utils.escapeHtml(usageRecord.gdrive_link || usageRecord.gdriveLink || booking.gdriveLink)}" target="_blank" class="btn btn-primary">
+                        <i class="fa-brands fa-google-drive mr-2"></i> View Files on Google Drive
+                    </a>
+                </div>
+                ` : ''}
+            `;
+        } else {
+            usageSection.innerHTML = `
+                <div class="empty-state p-4 text-center">
+                    <div class="empty-state-icon" style="opacity: 0.5;"><i class="fa-solid fa-file-circle-xmark"></i></div>
+                    <p class="text-secondary">No usage report has been submitted for this booking yet.</p>
+                </div>
+            `;
+        }
+
+        // Approval Details if available
+        if (['approved', 'rejected'].includes(booking.status)) {
+            const approvalCard = clone.getElementById('approval-details-card');
+            const approvalContent = clone.getElementById('approval-details-content');
+            approvalCard.style.display = 'block';
+
+            if (booking.status === 'approved') {
+                approvalContent.innerHTML = `
+                    <div class="detail-group">
+                        <div class="detail-label">Approved By ID</div>
+                        <div class="detail-value">${booking.approvedBy || '-'}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Approved At</div>
+                        <div class="detail-value">${booking.approvedAt ? new Date(booking.approvedAt).toLocaleString() : '-'}</div>
+                    </div>
+                `;
+            } else if (booking.status === 'rejected') {
+                approvalContent.innerHTML = `
+                    <div class="detail-group">
+                        <div class="detail-label">Rejected By ID</div>
+                        <div class="detail-value">${booking.rejectedBy || '-'}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Rejected At</div>
+                        <div class="detail-value">${booking.rejectedAt ? new Date(booking.rejectedAt).toLocaleString() : '-'}</div>
+                    </div>
+                    <div class="detail-group sm-col-span-2 mt-2">
+                        <div class="detail-label">Rejection Reason</div>
+                        <div class="detail-value text-danger">${Utils.escapeHtml(booking.rejectionReason || 'No reason provided')}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Replace loading state with content
+        container.innerHTML = '';
+        container.appendChild(clone);
     }
 };
 

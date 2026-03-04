@@ -117,6 +117,84 @@ router.get('/', authenticate, async (req, res, next) => {
     }
 });
 
+// GET /api/bookings/:id - Get a single booking
+router.get('/:id', authenticate, async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const sql = `
+            SELECT b.*, 
+                r.name as resource_name, r.location as resource_location, r.sub_type as resource_type,
+                u.name as user_name, u.email as user_email, u.role as user_role,
+                ts.label as slot_label, ts.start_time, ts.end_time,
+                approver.name as approved_by_name,
+                rejecter.name as rejected_by_name,
+                EXISTS(SELECT 1 FROM usage_records ur WHERE ur.booking_id = b.id) as has_usage_record,
+                (SELECT gdrive_link FROM usage_records ur WHERE ur.booking_id = b.id) as gdrive_link
+            FROM bookings b
+            JOIN resources r ON b.resource_id = r.id
+            JOIN users u ON b.user_id = u.id
+            JOIN time_slots ts ON b.slot_id = ts.id
+            LEFT JOIN users approver ON b.approved_by = approver.id
+            LEFT JOIN users rejecter ON b.rejected_by = rejecter.id
+            WHERE b.id = $1
+        `;
+
+        const result = await query(sql, [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Booking not found' });
+        }
+
+        const row = result.rows[0];
+
+        // Non-admin users can only see their own bookings
+        if (req.user.role === 'user' && row.user_id !== req.user.id) {
+            return res.status(403).json({ success: false, error: 'Access denied' });
+        }
+
+        const booking = {
+            id: row.id,
+            resourceId: row.resource_id,
+            userId: row.user_id,
+            slotId: row.slot_id,
+            date: row.booking_date,
+            purpose: row.purpose,
+            status: row.status,
+            createdAt: row.created_at,
+            approvedBy: row.approved_by,
+            approvedAt: row.approved_at,
+            rejectedBy: row.rejected_by,
+            rejectedAt: row.rejected_at,
+            rejectionReason: row.rejection_reason,
+            hasUsageRecord: row.has_usage_record,
+            gdriveLink: row.gdrive_link,
+            resource: {
+                id: row.resource_id,
+                name: row.resource_name,
+                location: row.resource_location,
+                subType: row.resource_type
+            },
+            user: {
+                id: row.user_id,
+                name: row.user_name,
+                email: row.user_email,
+                role: row.user_role
+            },
+            slot: {
+                id: row.slot_id,
+                label: row.slot_label,
+                start: row.start_time,
+                end: row.end_time
+            }
+        };
+
+        res.json({ success: true, data: booking });
+    } catch (error) {
+        next(error);
+    }
+});
+
 // POST /api/bookings - Create booking
 router.post('/', authenticate, async (req, res, next) => {
     try {
