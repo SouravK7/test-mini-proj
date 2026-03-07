@@ -1,10 +1,13 @@
 -- =============================================
 -- COET Ground Booking System - PostgreSQL Schema
--- Version: 1.0
+-- Version: 1.2
 -- Database: PostgreSQL
+-- Last Updated: 2026-03-08
 -- =============================================
 
 -- Drop existing tables (in reverse order of dependencies)
+DROP TABLE IF EXISTS email_verification_tokens CASCADE;
+DROP TABLE IF EXISTS password_reset_tokens CASCADE;
 DROP TABLE IF EXISTS usage_media CASCADE;
 DROP TABLE IF EXISTS usage_records CASCADE;
 DROP TABLE IF EXISTS sessions CASCADE;
@@ -28,6 +31,7 @@ CREATE TABLE users (
     department      VARCHAR(100)    NULL,
     avatar_url      VARCHAR(500)    NULL,
     is_active       BOOLEAN         NOT NULL DEFAULT TRUE,
+    is_verified     BOOLEAN         NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -150,7 +154,29 @@ CREATE TABLE usage_media (
 CREATE INDEX idx_media_usage_record ON usage_media(usage_record_id);
 
 -- ============================================
--- 9. SESSIONS TABLE
+-- 9. EMAIL VERIFICATION TOKENS TABLE
+-- ============================================
+CREATE TABLE email_verification_tokens (
+    id              SERIAL          PRIMARY KEY,
+    user_id         INT             NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token           VARCHAR(64)     NOT NULL UNIQUE,
+    expires_at      TIMESTAMP       NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
+-- 10. PASSWORD RESET TOKENS TABLE
+-- ============================================
+CREATE TABLE password_reset_tokens (
+    id              SERIAL          PRIMARY KEY,
+    user_id         INT             NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token           VARCHAR(64)     NOT NULL UNIQUE,
+    expires_at      TIMESTAMP       NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
+-- 11. SESSIONS TABLE
 -- ============================================
 CREATE TABLE sessions (
     id              SERIAL          PRIMARY KEY,

@@ -1,7 +1,8 @@
 -- =============================================
 -- COET Ground Booking System - Database Schema
--- Version: 1.1
+-- Version: 1.2
 -- Database: PostgreSQL
+-- Last Updated: 2026-03-08
 -- =============================================
 
 -- ============================================
@@ -20,6 +21,7 @@ CREATE TABLE users (
     department      VARCHAR(100)    NULL,           -- For faculty members
     avatar_url      VARCHAR(500)    NULL,
     is_active       BOOLEAN         NOT NULL DEFAULT TRUE,
+    is_verified     BOOLEAN         NOT NULL DEFAULT FALSE,  -- Email verification status
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -155,7 +157,53 @@ CREATE INDEX idx_usage_booking ON usage_records(booking_id);
 
 
 -- ============================================
--- 8. SESSIONS TABLE (Optional: For JWT/Token Auth)
+-- 8. USAGE MEDIA TABLE
+-- ============================================
+-- Stores media files associated with a usage record (optional file attachments)
+
+CREATE TABLE usage_media (
+    id              SERIAL          PRIMARY KEY,
+    usage_record_id INT             NOT NULL REFERENCES usage_records(id) ON DELETE CASCADE,
+    file_name       VARCHAR(255)    NOT NULL,
+    file_url        VARCHAR(500)    NOT NULL,
+    file_type       VARCHAR(20)     NOT NULL DEFAULT 'image' CHECK (file_type IN ('image', 'video', 'document')),
+    file_size       INT             NULL,
+    uploaded_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_media_usage_record ON usage_media(usage_record_id);
+
+
+-- ============================================
+-- 9. EMAIL VERIFICATION TOKENS TABLE
+-- ============================================
+-- Stores time-limited tokens sent to users for email verification on registration
+
+CREATE TABLE email_verification_tokens (
+    id              SERIAL          PRIMARY KEY,
+    user_id         INT             NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token           VARCHAR(64)     NOT NULL UNIQUE,
+    expires_at      TIMESTAMP       NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- ============================================
+-- 10. PASSWORD RESET TOKENS TABLE
+-- ============================================
+-- Stores time-limited tokens for password reset requests ("forgot password" flow)
+
+CREATE TABLE password_reset_tokens (
+    id              SERIAL          PRIMARY KEY,
+    user_id         INT             NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token           VARCHAR(64)     NOT NULL UNIQUE,
+    expires_at      TIMESTAMP       NOT NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- ============================================
+-- 11. SESSIONS TABLE (Optional: For JWT/Token Auth)
 -- ============================================
 -- Stores user sessions for authentication
 
@@ -236,73 +284,110 @@ INSERT INTO resource_rules (resource_id, rule_text) VALUES
 │ department      │     │ description     │              │
 │ avatar_url      │     │ image_url       │              │
 │ is_active       │     │ status          │              │
-│ created_at      │     │ created_at      │              │
-│ updated_at      │     │ updated_at      │              │
-└─────────────────┘     └─────────────────┘              │
-        │                       │                        │
-        │                       │                        │
-        │         ┌─────────────┴─────────────┐          │
-        │         │                           │          │
-        │         ▼                           ▼          │
-        │  ┌──────────────────┐   ┌──────────────────┐   │
-        │  │resource_amenities│   │  resource_rules  │   │
-        │  ├──────────────────┤   ├──────────────────┤   │
-        │  │ id (PK)          │   │ id (PK)          │   │
-        │  │ resource_id (FK) │   │ resource_id (FK) │   │
-        │  │ amenity_name     │   │ rule_text        │   │
-        │  └──────────────────┘   └──────────────────┘   │
-        │                                                │
-        │              ┌─────────────────┐               │
-        └─────────────►│    bookings     │◄──────────────┘
-                       ├─────────────────┤
-                       │ id (PK)         │
-                       │ resource_id(FK) │──────► resources
-                       │ user_id (FK)    │──────► users
-                       │ slot_id (FK)    │──────► time_slots
-                       │ booking_date    │
-                       │ purpose         │
-                       │ status          │
-                       │ approved_by(FK) │──────► users
-                       │ approved_at     │
-                       │ rejected_by(FK) │──────► users
-                       │ rejected_at     │
-                       │ rejection_reason│
-                       │ cancelled_at    │
-                       │ created_at      │
-                       │ updated_at      │
-                       └─────────────────┘
-                               │
-                               │
-                               ▼
-                       ┌─────────────────┐
-                       │  usage_records  │
-                       ├─────────────────┤
-                       │ id (PK)         │
-                       │ booking_id (FK) │──────► bookings (UNIQUE)
-                       │ uploaded_by(FK) │──────► users
-                       │ remarks         │
-                       │ issues          │
-                       │ gdrive_link     │
-                       │ uploaded_at     │
-                       └─────────────────┘
+│ is_verified  ◄──┼─┐   │ created_at      │              │
+│ created_at      │ │   │ updated_at      │              │
+│ updated_at      │ │   └─────────────────┘              │
+└─────────────────┘ │          │                        │
+        │           │          │                        │
+        │           │          │         ┌──────────────┴────────────┐
+        │           │          │         │                           │
+        │           │          ▼         ▼                           │
+        │           │  ┌──────────────────┐   ┌──────────────────┐   │
+        │           │  │resource_amenities│   │  resource_rules  │   │
+        │           │  ├──────────────────┤   ├──────────────────┤   │
+        │           │  │ id (PK)          │   │ id (PK)          │   │
+        │           │  │ resource_id (FK) │   │ resource_id (FK) │   │
+        │           │  │ amenity_name     │   │ rule_text        │   │
+        │           │  └──────────────────┘   └──────────────────┘   │
+        │           │                                                │
+        │           │              ┌─────────────────┐               │
+        └──────────►│    bookings  │◄──────────────┘
+                    ├─────────────────┤
+                    │ id (PK)         │
+                    │ resource_id(FK) │──────► resources
+                    │ user_id (FK)    │──────► users
+                    │ slot_id (FK)    │──────► time_slots
+                    │ booking_date    │
+                    │ purpose         │
+                    │ status          │
+                    │ approved_by(FK) │──────► users
+                    │ approved_at     │
+                    │ rejected_by(FK) │──────► users
+                    │ rejected_at     │
+                    │ rejection_reason│
+                    │ cancelled_at    │
+                    │ created_at      │
+                    │ updated_at      │
+                    └─────────────────┘
+                            │
+                            │
+                            ▼
+                    ┌─────────────────┐
+                    │  usage_records  │
+                    ├─────────────────┤
+                    │ id (PK)         │
+                    │ booking_id (FK) │──────► bookings (UNIQUE)
+                    │ uploaded_by(FK) │──────► users
+                    │ remarks         │
+                    │ issues          │
+                    │ gdrive_link     │
+                    │ uploaded_at     │
+                    └─────────────────┘
+                            │
+                            │
+                            ▼
+                    ┌─────────────────┐
+                    │   usage_media   │
+                    ├─────────────────┤
+                    │ id (PK)         │
+                    │usage_record_id  │──────► usage_records
+                    │ file_name       │
+                    │ file_url        │
+                    │ file_type       │
+                    │ file_size       │
+                    │ uploaded_at     │
+                    └─────────────────┘
 
 
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║            AUTHENTICATION (SEPARATE FROM CORE BOOKING SYSTEM)                  ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
-┌─────────────────┐              ┌─────────────────┐
-│     users       │              │    sessions     │
-├─────────────────┤              ├─────────────────┤
-│ id (PK)         │◄─────────────│ user_id (FK)    │
-│ ...             │              │ id (PK)         │
-└─────────────────┘              │ token           │
-                                 │ expires_at      │
-                                 │ created_at      │
-                                 └─────────────────┘
+┌─────────────────┐       ┌──────────────────────────┐
+│     users       │       │  email_verification_      │
+├─────────────────┤       │       tokens              │
+│ id (PK)         │◄──────├──────────────────────────┤
+│ ...             │       │ id (PK)                   │
+│ is_verified     │       │ user_id (FK)              │
+└─────────────────┘       │ token (UNIQUE)            │
+        ▲                 │ expires_at                │
+        │                 │ created_at                │
+        │                 └──────────────────────────┘
+        │
+        │                 ┌──────────────────────────┐
+        │                 │  password_reset_tokens    │
+        └─────────────────├──────────────────────────┤
+                          │ id (PK)                   │
+                          │ user_id (FK)              │
+                          │ token (UNIQUE)            │
+                          │ expires_at                │
+                          │ created_at                │
+                          └──────────────────────────┘
+
+                          ┌─────────────────┐
+                          │    sessions     │
+            ┌─────────────├─────────────────┤
+            │             │ id (PK)         │
+            ▼             │ user_id (FK)    │
+      ┌─────────────────┐ │ token (UNIQUE)  │
+      │     users       │ │ expires_at      │
+      │ id (PK)         │ │ created_at      │
+      │ ...             │ └─────────────────┘
+      └─────────────────┘
 
 Note: The sessions table is used for authentication/login tracking.
-      It is separate from the core booking workflow and is optional
-      if using stateless JWT tokens without server-side validation.
+      email_verification_tokens stores one-time tokens emailed to users
+      on registration so they can verify their account (sets is_verified=true).
+      password_reset_tokens stores one-time tokens for the "forgot password" flow.
+      All token tables use ON DELETE CASCADE to clean up when a user is deleted.
 */
-
