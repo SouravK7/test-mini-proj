@@ -129,7 +129,8 @@ const App = {
             'approvals': () => this.initApprovals(),
             'usage-upload': () => this.initUsageUpload(),
             'reports': () => this.initReports(),
-            'report-details': () => this.initReportDetails()
+            'report-details': () => this.initReportDetails(),
+            'add-resource': () => this.initAddResource()
         };
 
         const init = pageInits[this.currentPage];
@@ -212,6 +213,13 @@ const App = {
 
     // Resources page
     async initResources() {
+        // Show "Add Resource" button for admin
+        const user = AUTH.getCurrentUser();
+        if (user && user.role === 'admin') {
+            const addBtn = document.getElementById('add-resource-btn');
+            if (addBtn) addBtn.style.display = '';
+        }
+
         await this.loadResources();
         this.setupResourceFilters();
     },
@@ -246,7 +254,18 @@ const App = {
             return;
         }
 
-        container.innerHTML = result.data.map(r => `
+        const user = AUTH.getCurrentUser();
+        const isAdmin = user && user.role === 'admin';
+
+        container.innerHTML = result.data.map(r => {
+            const adminDropdown = isAdmin ? `
+              <select class="form-select resource-status-select" data-resource-id="${r.id}" data-current-status="${r.status}" style="width: auto; font-size: 0.75rem; padding: 3px 6px; min-width: 120px;">
+                <option value="available"${r.status === 'available' ? ' selected' : ''}>Available</option>
+                <option value="maintenance"${r.status === 'maintenance' ? ' selected' : ''}>Maintenance</option>
+                <option value="unavailable"${r.status === 'unavailable' ? ' selected' : ''}>Unavailable</option>
+              </select>` : '';
+
+            return `
       <div class="card resource-card">
         <div class="resource-card-image">
           <span><i class="fa-solid fa-futbol"></i></span>
@@ -256,11 +275,24 @@ const App = {
           <p class="text-sm text-secondary">${Utils.truncate(r.description, 80)}</p>
         </div>
         <div class="resource-card-footer">
-          ${Utils.getStatusBadge(r.status)}
+          ${isAdmin ? adminDropdown : Utils.getStatusBadge(r.status)}
           <a href="resource-detail.html?id=${r.id}" class="btn btn-primary btn-sm">View Details</a>
         </div>
       </div>
-    `).join('');
+    `;
+        }).join('');
+
+        // Attach change listeners to admin status dropdowns
+        if (isAdmin) {
+            container.querySelectorAll('.resource-status-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const resourceId = e.target.dataset.resourceId;
+                    const newStatus = e.target.value;
+                    const previousStatus = e.target.dataset.currentStatus;
+                    this.changeResourceStatus(resourceId, newStatus, e.target, previousStatus);
+                });
+            });
+        }
     },
 
     setupResourceFilters() {
@@ -279,6 +311,36 @@ const App = {
         searchInput?.addEventListener('input', applyFilters);
         typeFilter?.addEventListener('change', applyFilters);
         statusFilter?.addEventListener('change', applyFilters);
+    },
+
+    async changeResourceStatus(id, newStatus, selectEl, previousStatus) {
+        const labels = { available: 'Available', maintenance: 'Under Maintenance', unavailable: 'Unavailable' };
+        const confirmed = await Modal.confirm({
+            title: 'Change Resource Status?',
+            message: `Are you sure you want to set this resource to <strong>${labels[newStatus]}</strong>?`,
+            type: newStatus === 'available' ? 'success' : 'warning',
+            confirmText: `Yes, ${labels[newStatus]}`
+        });
+
+        if (!confirmed) {
+            // Revert dropdown to previous value
+            if (selectEl) selectEl.value = previousStatus;
+            return;
+        }
+
+        const result = await API.updateResourceStatus(id, newStatus);
+        if (result.success) {
+            Notifications.success('Status Updated', `Resource is now ${labels[newStatus]}`);
+            this.loadResources();
+        } else {
+            Notifications.error('Error', result.error || 'Failed to update status');
+            if (selectEl) selectEl.value = previousStatus;
+        }
+    },
+
+    // Add resource page (form logic is inline in add-resource.html)
+    initAddResource() {
+        // Handled by inline script
     },
 
     // Resource detail page
