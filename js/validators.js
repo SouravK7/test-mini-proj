@@ -5,7 +5,8 @@
 const Validators = {
     // Email validation
     email(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // Local part must contain at least one letter (rejects purely numeric like 12345@gmail.com)
+        const regex = /^(?=[^@]*[a-zA-Z])[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     },
 

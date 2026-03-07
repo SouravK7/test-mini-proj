@@ -1,7 +1,7 @@
 -- =============================================
 -- COET Ground Booking System - Database Schema
--- Version: 1.0
--- Database: MySQL / PostgreSQL Compatible
+-- Version: 1.1
+-- Database: PostgreSQL
 -- =============================================
 
 -- ============================================
@@ -11,21 +11,21 @@
 -- Roles: 'admin', 'faculty', 'user'
 
 CREATE TABLE users (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
+    id              SERIAL          PRIMARY KEY,
     name            VARCHAR(100)    NOT NULL,
     email           VARCHAR(255)    NOT NULL UNIQUE,
     password_hash   VARCHAR(255)    NOT NULL,
-    role            ENUM('admin', 'faculty', 'user') NOT NULL DEFAULT 'user',
+    role            VARCHAR(20)     NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'faculty', 'user')),
     phone           VARCHAR(20)     NULL,
     department      VARCHAR(100)    NULL,           -- For faculty members
     avatar_url      VARCHAR(500)    NULL,
     is_active       BOOLEAN         NOT NULL DEFAULT TRUE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_users_email (email),
-    INDEX idx_users_role (role)
+    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
 
 
 -- ============================================
@@ -34,7 +34,7 @@ CREATE TABLE users (
 -- Stores all bookable resources (grounds, courts, etc.)
 
 CREATE TABLE resources (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
+    id              SERIAL          PRIMARY KEY,
     name            VARCHAR(150)    NOT NULL,
     type            VARCHAR(50)     NOT NULL DEFAULT 'playground',
     sub_type        VARCHAR(50)     NOT NULL,       -- cricket, football, basketball, tennis, athletics
@@ -42,13 +42,13 @@ CREATE TABLE resources (
     location        VARCHAR(200)    NOT NULL,
     description     TEXT            NULL,
     image_url       VARCHAR(500)    NULL,
-    status          ENUM('available', 'maintenance', 'unavailable') NOT NULL DEFAULT 'available',
+    status          VARCHAR(20)     NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'maintenance', 'unavailable')),
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_resources_status (status),
-    INDEX idx_resources_sub_type (sub_type)
+    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_resources_status ON resources(status);
+CREATE INDEX idx_resources_sub_type ON resources(sub_type);
 
 
 -- ============================================
@@ -57,13 +57,12 @@ CREATE TABLE resources (
 -- Stores amenities available for each resource (1:N relationship)
 
 CREATE TABLE resource_amenities (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
-    resource_id     INT             NOT NULL,
-    amenity_name    VARCHAR(100)    NOT NULL,
-    
-    FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE,
-    INDEX idx_amenities_resource (resource_id)
+    id              SERIAL          PRIMARY KEY,
+    resource_id     INT             NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+    amenity_name    VARCHAR(100)    NOT NULL
 );
+
+CREATE INDEX idx_amenities_resource ON resource_amenities(resource_id);
 
 
 -- ============================================
@@ -72,13 +71,12 @@ CREATE TABLE resource_amenities (
 -- Stores usage rules for each resource (1:N relationship)
 
 CREATE TABLE resource_rules (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
-    resource_id     INT             NOT NULL,
-    rule_text       VARCHAR(255)    NOT NULL,
-    
-    FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE,
-    INDEX idx_rules_resource (resource_id)
+    id              SERIAL          PRIMARY KEY,
+    resource_id     INT             NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+    rule_text       VARCHAR(255)    NOT NULL
 );
+
+CREATE INDEX idx_rules_resource ON resource_rules(resource_id);
 
 
 -- ============================================
@@ -87,14 +85,14 @@ CREATE TABLE resource_rules (
 -- Stores available booking time slots (system-wide)
 
 CREATE TABLE time_slots (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
+    id              SERIAL          PRIMARY KEY,
     label           VARCHAR(50)     NOT NULL,       -- e.g., "6:00 AM - 8:00 AM"
     start_time      TIME            NOT NULL,
     end_time        TIME            NOT NULL,
-    is_active       BOOLEAN         NOT NULL DEFAULT TRUE,
-    
-    INDEX idx_time_slots_active (is_active)
+    is_active       BOOLEAN         NOT NULL DEFAULT TRUE
 );
+
+CREATE INDEX idx_time_slots_active ON time_slots(is_active);
 
 
 -- ============================================
@@ -103,20 +101,20 @@ CREATE TABLE time_slots (
 -- Core booking records linking users to resources and time slots
 
 CREATE TABLE bookings (
-    id                  INT             PRIMARY KEY AUTO_INCREMENT,
-    resource_id         INT             NOT NULL,
-    user_id             INT             NOT NULL,
-    slot_id             INT             NOT NULL,
+    id                  SERIAL          PRIMARY KEY,
+    resource_id         INT             NOT NULL REFERENCES resources(id) ON DELETE RESTRICT,
+    user_id             INT             NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    slot_id             INT             NOT NULL REFERENCES time_slots(id) ON DELETE RESTRICT,
     booking_date        DATE            NOT NULL,
     purpose             TEXT            NOT NULL,
-    status              ENUM('pending', 'approved', 'rejected', 'cancelled', 'completed') NOT NULL DEFAULT 'pending',
+    status              VARCHAR(20)     NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled', 'completed')),
     
     -- Approval tracking
-    approved_by         INT             NULL,
+    approved_by         INT             NULL REFERENCES users(id) ON DELETE SET NULL,
     approved_at         TIMESTAMP       NULL,
     
     -- Rejection tracking
-    rejected_by         INT             NULL,
+    rejected_by         INT             NULL REFERENCES users(id) ON DELETE SET NULL,
     rejected_at         TIMESTAMP       NULL,
     rejection_reason    TEXT            NULL,
     
@@ -125,25 +123,15 @@ CREATE TABLE bookings (
     
     -- Timestamps
     created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
-    -- Foreign Keys
-    FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE RESTRICT,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
-    FOREIGN KEY (slot_id) REFERENCES time_slots(id) ON DELETE RESTRICT,
-    FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (rejected_by) REFERENCES users(id) ON DELETE SET NULL,
-    
-    -- Indexes for common queries
-    INDEX idx_bookings_resource_date (resource_id, booking_date),
-    INDEX idx_bookings_user (user_id),
-    INDEX idx_bookings_status (status),
-    INDEX idx_bookings_date (booking_date),
-    
-    -- Prevent double booking (unique constraint on resource + date + slot for active bookings)
-    -- Note: This is enforced at application level for status-based logic
-    UNIQUE KEY unique_booking (resource_id, booking_date, slot_id, status)
+    UNIQUE (resource_id, booking_date, slot_id, status)
 );
+
+CREATE INDEX idx_bookings_resource_date ON bookings(resource_id, booking_date);
+CREATE INDEX idx_bookings_user ON bookings(user_id);
+CREATE INDEX idx_bookings_status ON bookings(status);
+CREATE INDEX idx_bookings_date ON bookings(booking_date);
 
 
 -- ============================================
@@ -152,55 +140,35 @@ CREATE TABLE bookings (
 -- Tracks actual usage of booked resources with evidence uploads
 
 CREATE TABLE usage_records (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
-    booking_id      INT             NOT NULL,
-    uploaded_by     INT             NOT NULL,
+    id              SERIAL          PRIMARY KEY,
+    booking_id      INT             NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+    uploaded_by     INT             NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     remarks         TEXT            NULL,
     issues          TEXT            NULL,           -- Any problems reported
+    gdrive_link     VARCHAR(1000)   NULL,           -- Google Drive link to evidence/media
     uploaded_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
-    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE RESTRICT,
-    
-    INDEX idx_usage_booking (booking_id)
+    UNIQUE (booking_id)                             -- One usage record per booking
 );
 
-
--- ============================================
--- 8. USAGE MEDIA TABLE
--- ============================================
--- Stores media files (photos/videos) for usage records (1:N relationship)
-
-CREATE TABLE usage_media (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
-    usage_record_id INT             NOT NULL,
-    file_name       VARCHAR(255)    NOT NULL,
-    file_url        VARCHAR(500)    NOT NULL,
-    file_type       ENUM('image', 'video', 'document') NOT NULL DEFAULT 'image',
-    file_size       INT             NULL,           -- Size in bytes
-    uploaded_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (usage_record_id) REFERENCES usage_records(id) ON DELETE CASCADE,
-    INDEX idx_media_usage_record (usage_record_id)
-);
+CREATE INDEX idx_usage_booking ON usage_records(booking_id);
 
 
 -- ============================================
--- 9. SESSIONS TABLE (Optional: For JWT/Token Auth)
+-- 8. SESSIONS TABLE (Optional: For JWT/Token Auth)
 -- ============================================
 -- Stores user sessions for authentication
 
 CREATE TABLE sessions (
-    id              INT             PRIMARY KEY AUTO_INCREMENT,
-    user_id         INT             NOT NULL,
+    id              SERIAL          PRIMARY KEY,
+    user_id         INT             NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token           VARCHAR(500)    NOT NULL UNIQUE,
     expires_at      TIMESTAMP       NOT NULL,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_sessions_token (token),
-    INDEX idx_sessions_user (user_id)
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_sessions_token ON sessions(token);
+CREATE INDEX idx_sessions_user ON sessions(user_id);
 
 
 -- ============================================
@@ -246,41 +214,6 @@ INSERT INTO resource_rules (resource_id, rule_text) VALUES
     (1, 'Prior booking required for floodlight use'),
     (1, 'Maximum 3-hour slots');
 
-
--- ============================================
--- VIEW: Booking Details (Joins for common queries)
--- ============================================
-
-CREATE VIEW v_booking_details AS
-SELECT 
-    b.id AS booking_id,
-    b.booking_date,
-    b.purpose,
-    b.status,
-    b.created_at,
-    b.approved_at,
-    b.rejected_at,
-    b.rejection_reason,
-    r.id AS resource_id,
-    r.name AS resource_name,
-    r.location AS resource_location,
-    r.sub_type AS resource_type,
-    u.id AS user_id,
-    u.name AS user_name,
-    u.email AS user_email,
-    u.role AS user_role,
-    ts.id AS slot_id,
-    ts.label AS slot_label,
-    ts.start_time,
-    ts.end_time,
-    approver.name AS approved_by_name,
-    rejecter.name AS rejected_by_name
-FROM bookings b
-JOIN resources r ON b.resource_id = r.id
-JOIN users u ON b.user_id = u.id
-JOIN time_slots ts ON b.slot_id = ts.id
-LEFT JOIN users approver ON b.approved_by = approver.id
-LEFT JOIN users rejecter ON b.rejected_by = rejecter.id;
 
 
 -- ============================================
@@ -345,24 +278,11 @@ LEFT JOIN users rejecter ON b.rejected_by = rejecter.id;
                        │  usage_records  │
                        ├─────────────────┤
                        │ id (PK)         │
-                       │ booking_id (FK) │──────► bookings
+                       │ booking_id (FK) │──────► bookings (UNIQUE)
                        │ uploaded_by(FK) │──────► users
                        │ remarks         │
                        │ issues          │
-                       │ uploaded_at     │
-                       └─────────────────┘
-                               │
-                               │
-                               ▼
-                       ┌─────────────────┐
-                       │   usage_media   │
-                       ├─────────────────┤
-                       │ id (PK)         │
-                       │ usage_rec_id(FK)│──────► usage_records
-                       │ file_name       │
-                       │ file_url        │
-                       │ file_type       │
-                       │ file_size       │
+                       │ gdrive_link     │
                        │ uploaded_at     │
                        └─────────────────┘
 

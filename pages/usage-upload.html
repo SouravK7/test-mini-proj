@@ -149,12 +149,12 @@
             const result = await API.getBookings({ status: 'completed' });
 
             if (result.success && result.data.length > 0) {
-                const availableBookings = result.data.filter(b => !b.hasUsageRecord);
+                const availableBookings = result.data.filter(b => b.hasUsageRecord === false);
 
                 if (availableBookings.length > 0) {
                     selectEl.innerHTML = '<option value="">Select a completed booking...</option>';
                     availableBookings.forEach(b => {
-                        const date = new Date(b.date).toLocaleDateString();
+                        const date = new Date(b.date).toLocaleDateString('en-GB');
                         selectEl.innerHTML += `<option value="${b.id}">${b.resource.name} - ${date} (${b.slot.label}) booked by ${b.user.name}</option>`;
                     });
                 } else {

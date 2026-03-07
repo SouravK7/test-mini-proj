@@ -15,7 +15,9 @@
 
 <body>
     <div class="login-page">
-        <button class="theme-toggle login-theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
+        <button class="theme-toggle login-theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
+                    class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i
+                    class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
         <div class="login-container">
             <div class="login-card">
                 <div class="login-header">
@@ -57,6 +59,19 @@
                             Create Account
                         </button>
                     </form>
+
+                    <!-- Shown after successful registration -->
+                    <div id="verify-panel" style="display:none; text-align:center; padding: 8px 0;">
+                        <div style="font-size:3rem; color:var(--color-success); margin-bottom:12px;">
+                            <i class="fa-solid fa-envelope-circle-check"></i>
+                        </div>
+                        <h2 style="margin-bottom:8px;">Check your email</h2>
+                        <p class="text-secondary" style="margin-bottom:20px;">
+                            We've sent a verification link to <strong id="verify-email-display"></strong>.<br>
+                            Click it to activate your account, then come back to log in.
+                        </p>
+                        <a href="../login.html" class="btn btn-primary btn-lg w-full">Go to Login</a>
+                    </div>
                 </div>
 
                 <div class="login-footer">
@@ -111,8 +126,10 @@
             btn.textContent = 'Create Account';
 
             if (result.success) {
-                Notifications.success('Success', 'Account created! Redirecting...');
-                setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                // Show verify-email panel instead of redirecting
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('verify-email-display').textContent = email;
+                document.getElementById('verify-panel').style.display = '';
             } else {
                 Notifications.error('Error', result.error);
             }

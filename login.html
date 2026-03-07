@@ -80,6 +80,7 @@
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('remember').checked;
       const btn = document.getElementById('login-btn');
 
       // Validate
@@ -98,7 +99,7 @@
       btn.innerHTML = '<span class="spinner"></span> Signing in...';
 
       // Attempt login
-      const result = await AUTH.login(email, password);
+      const result = await AUTH.login(email, password, rememberMe);
 
       btn.disabled = false;
       btn.textContent = 'Sign In';

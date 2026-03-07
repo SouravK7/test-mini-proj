@@ -4,14 +4,22 @@
    ============================================= */
 
 const AUTH = {
-    // Storage key
+    // Storage key (same key used in both storages)
     STORAGE_KEY: 'tec_user_session',
+
+    // Helper: get the storage that currently holds a session
+    _getStorage() {
+        if (localStorage.getItem(this.STORAGE_KEY)) return localStorage;
+        if (sessionStorage.getItem(this.STORAGE_KEY)) return sessionStorage;
+        return null;
+    },
+
 
     // API Base URL - point directly to backend for local development
     baseUrl: `http://${window.location.hostname}:3000`,
 
-    // Login
-    async login(email, password) {
+    // Login — rememberMe: true → localStorage (persists), false → sessionStorage (tab-only)
+    async login(email, password, rememberMe = false) {
         try {
             const response = await fetch(`${this.baseUrl}/api/auth/login`, {
                 method: 'POST',
@@ -36,7 +44,12 @@ const AUTH = {
                 loginAt: new Date().toISOString()
             };
 
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
+            // Clear whichever store might have a stale session first
+            localStorage.removeItem(this.STORAGE_KEY);
+            sessionStorage.removeItem(this.STORAGE_KEY);
+
+            const store = rememberMe ? localStorage : sessionStorage;
+            store.setItem(this.STORAGE_KEY, JSON.stringify(session));
             return { success: true, data: session };
         } catch (error) {
             console.error('Login error:', error);
@@ -59,18 +72,8 @@ const AUTH = {
                 return { success: false, error: data.error || 'Registration failed' };
             }
 
-            // Store session with token
-            const session = {
-                id: data.data.id,
-                name: data.data.name,
-                email: data.data.email,
-                role: data.data.role,
-                token: data.data.token,
-                loginAt: new Date().toISOString()
-            };
-
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
-            return { success: true, data: session };
+            // Registration successful — email verification required before login
+            return { success: true, requiresVerification: data.requiresVerification || false };
         } catch (error) {
             console.error('Register error:', error);
             return { success: false, error: 'Network error. Please try again.' };
@@ -96,12 +99,15 @@ const AUTH = {
     // Logout
     logout() {
         localStorage.removeItem(this.STORAGE_KEY);
+        sessionStorage.removeItem(this.STORAGE_KEY);
         window.location.href = '../login.html';
     },
 
-    // Get current user
+    // Get current user (checks localStorage first, then sessionStorage)
     getCurrentUser() {
-        const session = localStorage.getItem(this.STORAGE_KEY);
+        const store = this._getStorage();
+        if (!store) return null;
+        const session = store.getItem(this.STORAGE_KEY);
         return session ? JSON.parse(session) : null;
     },
 

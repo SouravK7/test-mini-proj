@@ -7,12 +7,12 @@ const API = {
     // Base URL - point directly to backend for local development 
     baseUrl: `http://${window.location.hostname}:3000`,
 
-    // Get auth token from storage
+    // Get auth token from storage (checks localStorage first, then sessionStorage)
     getToken() {
-        const session = localStorage.getItem('tec_user_session');
-        if (session) {
-            const parsed = JSON.parse(session);
-            return parsed.token;
+        const key = 'tec_user_session';
+        const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+        if (raw) {
+            try { return JSON.parse(raw).token; } catch (e) { }
         }
         return null;
     },

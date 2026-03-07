@@ -15,6 +15,17 @@
 </head>
 
 <body>
+    <script>
+        // If user logged in with "Remember Me", skip public calendar → go to dashboard
+        (function () {
+            try {
+                const session = localStorage.getItem('tec_user_session');
+                if (session && JSON.parse(session).token) {
+                    window.location.replace('pages/dashboard.html');
+                }
+            } catch (e) { /* ignore malformed session */ }
+        })();
+    </script>
     <!-- Public Header -->
     <header class="public-header">
         <div class="public-logo">

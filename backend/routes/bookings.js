@@ -89,7 +89,7 @@ router.get('/', authenticate, async (req, res, next) => {
             rejectedBy: row.rejected_by,
             rejectedAt: row.rejected_at,
             rejectionReason: row.rejection_reason,
-            hasUsageRecord: row.has_usage_record,
+            hasUsageRecord: row.has_usage_record === true || row.has_usage_record === 'true',
             gdriveLink: row.gdrive_link,
             resource: {
                 id: row.resource_id,
