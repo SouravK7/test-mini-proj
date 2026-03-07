@@ -81,6 +81,13 @@ const API = {
         return this.request(`/api/resources/${id}`, { method: 'DELETE' });
     },
 
+    async updateResourceStatus(id, status) {
+        return this.request(`/api/resources/${id}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status })
+        });
+    },
+
     // ============ BOOKINGS ============
     async getBookings(filters = {}) {
         const params = new URLSearchParams();

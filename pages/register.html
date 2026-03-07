@@ -11,52 +11,152 @@
     <link rel="stylesheet" href="../css/pages.css">
     <link rel="stylesheet" href="../css/theme-toggle.css">
     <script src="../js/theme.js"></script>
+    <style>
+        .otp-display {
+            background: var(--color-primary-50);
+            border: 2px dashed var(--color-primary);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            text-align: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .otp-display .otp-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2);
+        }
+
+        .otp-display .otp-code {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.5em;
+            color: var(--color-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .otp-display .otp-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: var(--space-2);
+        }
+
+        .step-section {
+            display: none;
+        }
+
+        .step-section.active {
+            display: block;
+        }
+
+        .email-badge {
+            background: var(--color-primary-50);
+            border-radius: var(--radius-md);
+            padding: var(--space-3);
+            margin-bottom: var(--space-4);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .email-badge strong {
+            color: var(--text-primary);
+        }
+    </style>
 </head>
 
 <body>
     <div class="login-page">
-        <button class="theme-toggle login-theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
+        <button class="theme-toggle login-theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
+                    class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i
+                    class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
         <div class="login-container">
             <div class="login-card">
                 <div class="login-header">
                     <div class="login-logo"><i class="fa-solid fa-landmark"></i></div>
                     <h1 class="login-title">Create Account</h1>
-                    <p class="login-subtitle">Register to book college resources</p>
+                    <p class="login-subtitle" id="step-subtitle">Register to book college resources</p>
                 </div>
 
                 <div class="login-body">
-                    <form id="register-form">
-                        <div class="form-group">
-                            <label class="form-label required" for="name">Full Name</label>
-                            <input type="text" id="name" class="form-input" placeholder="Enter your full name" required>
+
+                    <!-- Step 1: Registration form -->
+                    <div class="step-section active" id="step-1">
+                        <form id="register-form">
+                            <div class="form-group">
+                                <label class="form-label required" for="name">Full Name</label>
+                                <input type="text" id="name" class="form-input" placeholder="Enter your full name"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label required" for="email">Email Address</label>
+                                <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="phone">Phone Number</label>
+                                <input type="tel" id="phone" class="form-input" placeholder="10-digit phone number">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label required" for="password">Password</label>
+                                <input type="password" id="password" class="form-input"
+                                    placeholder="Minimum 6 characters" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label required" for="confirm-password">Confirm Password</label>
+                                <input type="password" id="confirm-password" class="form-input"
+                                    placeholder="Re-enter password" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-full" id="send-otp-btn">
+                                <i class="fa-solid fa-paper-plane"></i> Verify Email & Register
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: Email OTP verification -->
+                    <div class="step-section" id="step-2">
+                        <div class="email-badge" id="email-badge"></div>
+
+                        <div class="otp-display">
+                            <div class="otp-label"><i class="fa-solid fa-envelope-circle-check"></i> Email Verification
+                                OTP</div>
+                            <div class="otp-code" id="otp-code">------</div>
+                            <div class="otp-note">In production, this OTP would be sent to your email</div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label required" for="email">Email Address</label>
-                            <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+                            <label class="form-label required" for="otp-input">Enter OTP</label>
+                            <input type="text" id="otp-input" class="form-input" placeholder="Enter 6-digit OTP"
+                                maxlength="6" pattern="[0-9]{6}"
+                                style="text-align: center; font-size: 1.2rem; letter-spacing: 0.3em;">
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="phone">Phone Number</label>
-                            <input type="tel" id="phone" class="form-input" placeholder="10-digit phone number">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required" for="password">Password</label>
-                            <input type="password" id="password" class="form-input" placeholder="Minimum 6 characters"
-                                required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required" for="confirm-password">Confirm Password</label>
-                            <input type="password" id="confirm-password" class="form-input"
-                                placeholder="Re-enter password" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg w-full" id="register-btn">
-                            Create Account
+                        <button type="button" class="btn btn-primary btn-lg w-full" id="verify-btn"
+                            onclick="verifyAndRegister()">
+                            <i class="fa-solid fa-check-circle"></i> Verify & Create Account
                         </button>
-                    </form>
+
+                        <button type="button" class="btn btn-ghost btn-sm w-full mt-3" onclick="showStep(1)"
+                            style="margin-top: var(--space-3);">
+                            <i class="fa-solid fa-arrow-left"></i> Go Back & Edit Details
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Success -->
+                    <div class="step-section" id="step-3">
+                        <div class="text-center p-4"
+                            style="background: var(--color-success-bg); border-radius: var(--radius-md);">
+                            <p class="text-success font-semibold" style="font-size: 1.1rem;">
+                                <i class="fa-solid fa-check-circle"></i> Account Created Successfully!
+                            </p>
+                            <p class="text-sm text-secondary mt-2">Your email has been verified. Redirecting to
+                                dashboard...</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="login-footer">
@@ -72,51 +172,134 @@
     <script src="../js/auth.js"></script>
     <script src="../js/utils.js"></script>
     <script>
+        const API_BASE = `http://${window.location.hostname}:3000`;
+        let storedOtp = null;
+        let storedFormData = null;
+
+        function showStep(stepNum) {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${stepNum}`).classList.add('active');
+
+            const subtitles = {
+                1: 'Register to book college resources',
+                2: 'Verify your email address',
+                3: 'Welcome aboard!'
+            };
+            document.getElementById('step-subtitle').textContent = subtitles[stepNum];
+        }
+
+        // Step 1: Validate form and send email OTP
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-            const btn = document.getElementById('register-btn');
 
+            // Validate
             if (!Validators.required(name)) {
                 Notifications.error('Error', 'Name is required');
                 return;
             }
-
             if (!Validators.email(email)) {
                 Notifications.error('Error', 'Please enter a valid email');
                 return;
             }
-
             if (!Validators.password(password)) {
                 Notifications.error('Error', 'Password must be at least 6 characters');
                 return;
             }
-
             if (password !== confirmPassword) {
                 Notifications.error('Error', 'Passwords do not match');
                 return;
             }
 
+            // Store form data for later
+            storedFormData = { name, email, phone, password };
+
+            const btn = document.getElementById('send-otp-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Sending OTP...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/send-register-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await response.json();
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Verify Email & Register';
+
+                if (!data.success) {
+                    Notifications.error('Error', data.error || 'Failed to send OTP');
+                    return;
+                }
+
+                storedOtp = data.otp;
+                document.getElementById('otp-code').textContent = data.otp;
+                document.getElementById('email-badge').innerHTML =
+                    `OTP sent to <strong>${email}</strong>`;
+
+                showStep(2);
+                Notifications.success('OTP Generated', 'Enter the OTP shown above to verify your email');
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Verify Email & Register';
+                Notifications.error('Error', 'Network error. Please try again.');
+            }
+        });
+
+        // Step 2: Verify OTP and create account
+        async function verifyAndRegister() {
+            const otp = document.getElementById('otp-input').value.trim();
+
+            if (!otp || otp.length !== 6) {
+                Notifications.error('Error', 'Please enter the 6-digit OTP');
+                return;
+            }
+
+            const btn = document.getElementById('verify-btn');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span> Creating account...';
 
-            const result = await AUTH.register({ name, email, phone, password });
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...storedFormData,
+                        otp
+                    })
+                });
+                const data = await response.json();
 
-            btn.disabled = false;
-            btn.textContent = 'Create Account';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Verify & Create Account';
 
-            if (result.success) {
-                Notifications.success('Success', 'Account created! Redirecting...');
-                setTimeout(() => window.location.href = 'dashboard.html', 1000);
-            } else {
-                Notifications.error('Error', result.error);
+                if (!data.success) {
+                    Notifications.error('Error', data.error || 'Registration failed');
+                    return;
+                }
+
+                // Store auth data
+                localStorage.setItem('token', data.data.token);
+                localStorage.setItem('user', JSON.stringify(data.data));
+
+                showStep(3);
+                Notifications.success('Success', 'Account created and email verified!');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+            } catch (error) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Verify & Create Account';
+                Notifications.error('Error', 'Network error. Please try again.');
             }
-        });
+        }
     </script>
 </body>
 

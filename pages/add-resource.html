@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Resource | Digital Calendar for Academic Institute</title>
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/pages.css">
+    <link rel="stylesheet" href="../css/theme-toggle.css">
+    <script src="../js/theme.js"></script>
+    <style>
+        .dynamic-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .dynamic-list-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .dynamic-list-item .form-input {
+            flex: 1;
+        }
+
+        .dynamic-list-item .btn-remove {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-default);
+            background: transparent;
+            color: var(--color-danger);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dynamic-list-item .btn-remove:hover {
+            background: var(--color-danger);
+            color: white;
+            border-color: var(--color-danger);
+        }
+
+        .btn-add-item {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-top: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            background: transparent;
+            border: 1px dashed var(--border-default);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-add-item:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: var(--color-primary-50);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon"><i class="fa-solid fa-landmark"></i></div>
+                    <span>Resource Booking</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="dashboard.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-chart-bar"></i></span>Dashboard</a>
+                    <a href="resources.html" class="nav-item active"><span class="nav-item-icon"><i
+                                class="fa-solid fa-futbol"></i></span>Resources</a>
+                    <a href="calendar.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-calendar-days"></i></span>Calendar</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Bookings</div>
+                    <a href="booking-form.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-plus"></i></span>New Booking</a>
+                    <a href="my-bookings.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-clipboard-list"></i></span>My Bookings</a>
+                </div>
+                <div class="nav-section" data-role="user,faculty,admin">
+                    <div class="nav-section-title">Usage Management</div>
+                    <a href="usage-upload.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-cloud-arrow-up"></i></span>Upload Usage</a>
+                </div>
+                <div class="nav-section" data-role="admin">
+                    <div class="nav-section-title">Approval & Reports</div>
+                    <a href="approvals.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-check"></i></span>Approvals</a>
+                    <a href="reports.html" class="nav-item"><span class="nav-item-icon"><i
+                                class="fa-solid fa-chart-line"></i></span>Reports</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="javascript:void(0)" class="nav-item" onclick="AUTH.logout()"><span class="nav-item-icon"><i
+                            class="fa-solid fa-right-from-bracket"></i></span>Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i
+                            class="fa-solid fa-bars"></i></button>
+                    <a href="resources.html" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i>
+                        Back</a>
+                    <h1 class="navbar-title">Add New Resource</h1>
+                </div>
+                <div class="navbar-right">
+                    <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i
+                                class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i
+                                class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
+                    <div class="navbar-user">
+                        <div class="navbar-user-info">
+                            <div class="navbar-user-name">-</div>
+                            <div class="navbar-user-role">-</div>
+                        </div>
+                        <div class="avatar">--</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <form id="add-resource-form">
+                    <!-- Step 1: Basic Info -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-circle-info"></i> Basic Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label required" for="resource-name">Resource Name</label>
+                                <input type="text" id="resource-name" class="form-input"
+                                    placeholder="e.g., Main Cricket Ground" required>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                                <div class="form-group">
+                                    <label class="form-label required" for="resource-type">Type</label>
+                                    <select id="resource-type" class="form-select" required>
+                                        <option value="playground">Playground</option>
+                                        <option value="resource">Resource</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required" for="resource-subtype">Sub Type</label>
+                                    <input type="text" id="resource-subtype" class="form-input"
+                                        placeholder="e.g., cricket, football, volleyball" required>
+                                    <p class="form-hint">Sport or activity type</p>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                                <div class="form-group">
+                                    <label class="form-label" for="resource-capacity">Capacity</label>
+                                    <input type="number" id="resource-capacity" class="form-input"
+                                        placeholder="e.g., 200" min="0" value="0">
+                                    <p class="form-hint">Maximum number of people</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required" for="resource-location">Location</label>
+                                    <input type="text" id="resource-location" class="form-input"
+                                        placeholder="e.g., North Campus" required>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="resource-description">Description</label>
+                                <textarea id="resource-description" class="form-textarea" rows="3"
+                                    placeholder="Describe the resource, its features, and suitable activities..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Additional Details -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-sliders"></i> Additional Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                                <div class="form-group">
+                                    <label class="form-label" for="resource-image-url">Image URL</label>
+                                    <input type="url" id="resource-image-url" class="form-input"
+                                        placeholder="https://example.com/image.jpg">
+                                    <p class="form-hint">Optional cover image URL</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="resource-status">Initial Status</label>
+                                    <select id="resource-status" class="form-select">
+                                        <option value="available">Available</option>
+                                        <option value="maintenance">Under Maintenance</option>
+                                        <option value="unavailable">Unavailable</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Amenities -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-check-double"></i> Amenities</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-sm text-secondary mb-4">List the amenities available at this resource (e.g.,
+                                Floodlights, Changing Rooms, Scoreboard)</p>
+                            <div class="dynamic-list" id="amenities-list">
+                                <!-- Dynamic items added here -->
+                            </div>
+                            <button type="button" class="btn-add-item" onclick="addAmenityItem()">
+                                <i class="fa-solid fa-plus"></i> Add Amenity
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Rules -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-gavel"></i> Facility Rules</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-sm text-secondary mb-4">Add any rules or guidelines for using this resource
+                                (e.g., No metal spikes allowed)</p>
+                            <div class="dynamic-list" id="rules-list">
+                                <!-- Dynamic items added here -->
+                            </div>
+                            <button type="button" class="btn-add-item" onclick="addRuleItem()">
+                                <i class="fa-solid fa-plus"></i> Add Rule
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="flex gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                            <i class="fa-solid fa-plus"></i> Create Resource
+                        </button>
+                        <a href="resources.html" class="btn btn-secondary btn-lg">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/validators.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        // Require admin role
+        if (!AUTH.requireRole('admin')) {
+            // requireRole redirects automatically
+        }
+
+        // Dynamic amenity items
+        function addAmenityItem(value = '') {
+            const list = document.getElementById('amenities-list');
+            const item = document.createElement('div');
+            item.className = 'dynamic-list-item';
+            item.innerHTML = `
+                <input type="text" class="form-input amenity-input" placeholder="e.g., Floodlights" value="${Utils.escapeHtml(value)}">
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Remove">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            list.appendChild(item);
+            item.querySelector('input').focus();
+        }
+
+        // Dynamic rule items
+        function addRuleItem(value = '') {
+            const list = document.getElementById('rules-list');
+            const item = document.createElement('div');
+            item.className = 'dynamic-list-item';
+            item.innerHTML = `
+                <input type="text" class="form-input rule-input" placeholder="e.g., No metal spikes allowed" value="${Utils.escapeHtml(value)}">
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()" title="Remove">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            list.appendChild(item);
+            item.querySelector('input').focus();
+        }
+
+        // Form submission
+        document.getElementById('add-resource-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('resource-name').value.trim();
+            const type = document.getElementById('resource-type').value;
+            const subType = document.getElementById('resource-subtype').value.trim();
+            const capacity = parseInt(document.getElementById('resource-capacity').value) || 0;
+            const location = document.getElementById('resource-location').value.trim();
+            const description = document.getElementById('resource-description').value.trim();
+            const imageUrl = document.getElementById('resource-image-url').value.trim();
+            const status = document.getElementById('resource-status').value;
+
+            // Collect amenities
+            const amenities = [];
+            document.querySelectorAll('.amenity-input').forEach(input => {
+                const val = input.value.trim();
+                if (val) amenities.push(val);
+            });
+
+            // Collect rules
+            const rules = [];
+            document.querySelectorAll('.rule-input').forEach(input => {
+                const val = input.value.trim();
+                if (val) rules.push(val);
+            });
+
+            // Validation
+            if (!name) {
+                Notifications.error('Validation Error', 'Resource name is required');
+                return;
+            }
+            if (!subType) {
+                Notifications.error('Validation Error', 'Sub type is required');
+                return;
+            }
+            if (!location) {
+                Notifications.error('Validation Error', 'Location is required');
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Creating...';
+
+            const result = await API.createResource({
+                name,
+                type,
+                subType,
+                capacity,
+                location,
+                description: description || null,
+                imageUrl: imageUrl || null,
+                status,
+                amenities,
+                rules
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-plus"></i> Create Resource';
+
+            if (result.success) {
+                Notifications.success('Resource Created!', `"${name}" has been added successfully.`);
+                setTimeout(() => {
+                    window.location.href = 'resources.html';
+                }, 1500);
+            } else {
+                Notifications.error('Error', result.error || 'Failed to create resource');
+            }
+        });
+    </script>
+</body>
+
+</html>

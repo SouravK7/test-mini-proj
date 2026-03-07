@@ -78,18 +78,21 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
 // POST /api/resources - Create resource (admin only)
 router.post('/', authenticate, authorize('admin'), async (req, res, next) => {
     try {
-        const { name, type, subType, capacity, location, description, imageUrl, amenities, rules } = req.body;
+        const { name, type, subType, capacity, location, description, imageUrl, status, amenities, rules } = req.body;
 
         if (!name || !subType || !location) {
             return res.status(400).json({ success: false, error: 'Name, subType, and location are required' });
         }
 
+        const allowedStatuses = ['available', 'maintenance', 'unavailable'];
+        const resourceStatus = (status && allowedStatuses.includes(status)) ? status : 'available';
+
         // Insert resource
         const resourceResult = await query(`
       INSERT INTO resources (name, type, sub_type, capacity, location, description, image_url, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'available')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
-    `, [name, type || 'resource', subType, capacity || 0, location, description, imageUrl]);
+    `, [name, type || 'resource', subType, capacity || 0, location, description, imageUrl, resourceStatus]);
 
         const resource = resourceResult.rows[0];
 
@@ -158,6 +161,38 @@ router.put('/:id', authenticate, authorize('admin'), async (req, res, next) => {
                 await query('INSERT INTO resource_rules (resource_id, rule_text) VALUES ($1, $2)', [id, rule]);
             }
         }
+
+        res.json({ success: true, data: result.rows[0] });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// PATCH /api/resources/:id/status - Change resource status (admin only)
+router.patch('/:id/status', authenticate, authorize('admin'), async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const allowedStatuses = ['available', 'maintenance', 'unavailable'];
+        if (!status || !allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid status. Must be one of: ${allowedStatuses.join(', ')}`
+            });
+        }
+
+        // Check if resource exists
+        const existing = await query('SELECT id, status FROM resources WHERE id = $1', [id]);
+        if (existing.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Resource not found' });
+        }
+
+        // Update only status
+        const result = await query(
+            `UPDATE resources SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`,
+            [status, id]
+        );
 
         res.json({ success: true, data: result.rows[0] });
     } catch (error) {

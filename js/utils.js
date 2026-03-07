@@ -143,7 +143,8 @@ const Utils = {
             completed: { class: 'badge-completed', label: 'Completed' },
             cancelled: { class: 'badge-rejected', label: 'Cancelled' },
             available: { class: 'badge-approved', label: 'Available' },
-            maintenance: { class: 'badge-pending', label: 'Maintenance' }
+            maintenance: { class: 'badge-pending', label: 'Maintenance' },
+            unavailable: { class: 'badge-rejected', label: 'Unavailable' }
         };
         const info = statusMap[status] || { class: '', label: status };
         return `<span class="badge ${info.class}">${info.label}</span>`;
