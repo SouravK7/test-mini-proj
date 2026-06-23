@@ -9,6 +9,7 @@ const resourceRoutes = require('./routes/resources');
 const bookingRoutes = require('./routes/bookings');
 const statsRoutes = require('./routes/stats');
 const usageRoutes = require('./routes/usage');
+const paymentRoutes = require('./routes/payments');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/usage-records', usageRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api', statsRoutes);
 
 // Error handling middleware
