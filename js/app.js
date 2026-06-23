@@ -130,7 +130,8 @@ const App = {
             'usage-upload': () => this.initUsageUpload(),
             'reports': () => this.initReports(),
             'report-details': () => this.initReportDetails(),
-            'add-resource': () => this.initAddResource()
+            'add-resource': () => this.initAddResource(),
+            'payment-ledger': () => this.initPaymentLedger()
         };
 
         const init = pageInits[this.currentPage];
@@ -452,29 +453,61 @@ const App = {
             return;
         }
 
-        container.innerHTML = result.data.map(b => `
-      <tr>
-        <td>${b.resource?.name || 'Unknown'}</td>
-        <td>${Utils.formatDate(b.date)}</td>
-        <td class="whitespace-nowrap">${b.slot?.label || ''}</td>
-        <td>
-            <div title="${Utils.escapeHtml(b.purpose)}">${Utils.truncate(b.purpose, 40)}</div>
-        </td>
-        <td>${Utils.getStatusBadge(b.status)}</td>
-        <td>
-            ${b.status === 'rejected' && b.rejectionReason ? Utils.escapeHtml(b.rejectionReason) : '<span class="text-muted">-</span>'}
-        </td>
-        <td>
-            ${b.status === 'completed'
-                ? (b.hasUsageRecord ? '<span class="badge badge-success">Submitted</span>' : '<span class="badge badge-warning">Pending</span>')
-                : '<span class="text-muted">-</span>'}
-        </td>
-        <td>
-            ${b.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="App.cancelBooking(${b.id})">Cancel</button>` : ''}
-            ${b.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
-        </td>
-      </tr>
-    `).join('');
+        container.innerHTML = result.data.map(b => {
+            // Payment summary panel for auditorium bookings with financial data
+            const hasPaymentData = b.totalAmount && parseFloat(b.totalAmount) > 0;
+            const paymentWarningStatuses = ['awaiting_advance', 'partially_confirmed'];
+            const isPaymentPending = paymentWarningStatuses.includes(b.status);
+
+            const paymentBanner = isPaymentPending ? `
+                <tr class="payment-banner-row">
+                    <td colspan="8" style="padding: 0;">
+                        <div class="payment-visit-banner">
+                            <div class="payment-banner-icon"><i class="fa-solid fa-building-columns"></i></div>
+                            <div class="payment-banner-content">
+                                <strong>Action Required: In-Person Cash Payment</strong>
+                                <p>Please visit the <strong>College Administrative Office</strong> during working hours (9 AM – 5 PM) with your ID proof and booking reference <strong>#${b.id}</strong> to pay the required cash amount.</p>
+                            </div>
+                            ${hasPaymentData ? `
+                            <div class="payment-summary-inline">
+                                <div class="psm-item"><span>Total</span><strong>${Utils.formatCurrency(b.totalAmount)}</strong></div>
+                                <div class="psm-item"><span>Advance Paid</span><strong class="text-success">${Utils.formatCurrency(b.totalPaid)}</strong></div>
+                                <div class="psm-item"><span>Balance Due</span><strong class="text-danger">${Utils.formatCurrency(b.balanceDue)}</strong></div>
+                                ${b.securityDeposit && parseFloat(b.securityDeposit) > 0 ? `<div class="psm-item"><span>Security Deposit</span><strong>${Utils.formatCurrency(b.securityDeposit)}</strong></div>` : ''}
+                            </div>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            ` : '';
+
+            return `
+            ${paymentBanner}
+            <tr>
+                <td>${b.resource?.name || 'Unknown'}</td>
+                <td>${Utils.formatDate(b.date)}</td>
+                <td class="whitespace-nowrap">${b.slot?.label || ''}</td>
+                <td>
+                    <div title="${Utils.escapeHtml(b.purpose)}">${Utils.truncate(b.purpose, 40)}</div>
+                    ${b.eventCategory ? `<div class="text-xs text-secondary mt-1"><i class="fa-solid fa-tag"></i> ${Utils.escapeHtml(b.eventCategory)}</div>` : ''}
+                </td>
+                <td>${Utils.getStatusBadge(b.status)}</td>
+                <td>
+                    ${b.status === 'rejected' && b.rejectionReason ? Utils.escapeHtml(b.rejectionReason) : '<span class="text-muted">-</span>'}
+                </td>
+                <td>
+                    ${b.status === 'completed'
+                        ? (b.hasUsageRecord ? '<span class="badge badge-success">Submitted</span>' : '<span class="badge badge-warning">Pending</span>')
+                        : '<span class="text-muted">-</span>'}
+                </td>
+                <td>
+                    ${['pending_approval', 'pending'].includes(b.status) ? `<button class="btn btn-ghost btn-sm" onclick="App.cancelBooking(${b.id})">Cancel</button>` : ''}
+                    ${b.status === 'awaiting_advance' ? `<button class="btn btn-ghost btn-sm" onclick="App.cancelBooking(${b.id})">Cancel</button>` : ''}
+                    ${b.status === 'fully_confirmed' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
+                    ${b.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
+                </td>
+            </tr>
+        `;
+        }).join('');
     },
 
     setupBookingTabs() {
@@ -510,64 +543,281 @@ const App = {
     async initApprovals() {
         if (!AUTH.requireRole('admin')) return;
         await this.loadPendingApprovals();
+        await this.loadAwaitingPaymentBookings();
     },
 
     async loadPendingApprovals() {
         const container = document.getElementById('approvals-table-body');
         if (!container) return;
 
-        const result = await API.getBookings({ status: 'pending' });
+        const result = await API.getBookings({ status: 'pending_approval' });
         if (!result.success) {
-            container.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-danger">Failed to load approvals. ${result.error || ''}</td></tr>`;
+            container.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-danger">Failed to load approvals. ${result.error || ''}</td></tr>`;
             return;
         }
 
         if (result.data.length === 0) {
             container.innerHTML = `
-        <tr>
-          <td colspan="7" class="text-center p-6">
-            <div class="empty-state-icon"><i class="fa-solid fa-check"></i></div>
-            <p>No pending approvals</p>
-          </td>
-        </tr>
-      `;
+                <tr>
+                    <td colspan="8" class="text-center p-6">
+                        <div class="empty-state-icon"><i class="fa-solid fa-check"></i></div>
+                        <p>No pending approval requests</p>
+                    </td>
+                </tr>
+            `;
             return;
         }
 
         container.innerHTML = result.data.map(b => `
-      <tr>
-        <td>${b.user?.name || 'Unknown'}</td>
-        <td>${b.resource?.name || 'Unknown'}</td>
-        <td>${Utils.formatDate(b.date)}</td>
-        <td>${b.slot?.label || ''}</td>
-        <td>${Utils.truncate(b.purpose, 40)}</td>
-        <td>${Utils.timeAgo(b.createdAt)}</td>
-        <td>
-          <div class="flex gap-2">
-            <button class="btn btn-success btn-sm" onclick="App.approveBooking(${b.id})">Approve</button>
-            <button class="btn btn-danger btn-sm" onclick="App.rejectBooking(${b.id})">Reject</button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
+            <tr>
+                <td><strong>${Utils.escapeHtml(b.user?.name || 'Unknown')}</strong><br><span class="text-xs text-secondary">${Utils.escapeHtml(b.user?.email || '')}</span></td>
+                <td>${Utils.escapeHtml(b.resource?.name || 'Unknown')}<br><span class="badge" style="font-size:10px;background:var(--color-primary-50);color:var(--color-primary)">${b.resource?.type === 'auditorium' ? 'Auditorium' : 'Ground'}</span></td>
+                <td>${Utils.formatDate(b.date)}</td>
+                <td>${b.slot?.label || ''}</td>
+                <td>
+                    ${b.eventCategory ? `<span class="badge badge-partial" style="margin-bottom:4px;">${Utils.escapeHtml(b.eventCategory)}</span><br>` : ''}
+                    <span style="font-size:13px;">${Utils.truncate(b.purpose, 35)}</span>
+                </td>
+                <td>${Utils.timeAgo(b.createdAt)}</td>
+                <td>
+                    <div class="flex gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="App.openPaymentCallModal(${b.id}, '${Utils.escapeHtml(b.eventCategory || '')}', '${Utils.escapeHtml(b.resource?.name || '')}')">Issue Payment Call</button>
+                        <button class="btn btn-danger btn-sm" onclick="App.rejectBooking(${b.id})">Reject</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     },
 
-    async approveBooking(id) {
-        const confirmed = await Modal.confirm({
-            title: 'Approve Booking?',
-            message: 'This will confirm the booking for the requested time slot.',
-            type: 'success',
-            confirmText: 'Approve'
+    async loadAwaitingPaymentBookings() {
+        const container = document.getElementById('awaiting-payment-table-body');
+        if (!container) return;
+
+        // Load both awaiting_advance and partially_confirmed
+        const [awaitingResult, partialResult] = await Promise.all([
+            API.getBookings({ status: 'awaiting_advance' }),
+            API.getBookings({ status: 'partially_confirmed' })
+        ]);
+
+        const bookings = [
+            ...(awaitingResult.success ? awaitingResult.data : []),
+            ...(partialResult.success ? partialResult.data : [])
+        ].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+        if (bookings.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center p-6">
+                        <div class="empty-state-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                        <p>No bookings awaiting payment</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        container.innerHTML = bookings.map(b => `
+            <tr>
+                <td><strong>${Utils.escapeHtml(b.user?.name || 'Unknown')}</strong><br><span class="text-xs text-secondary">${Utils.escapeHtml(b.user?.email || '')}</span></td>
+                <td>${Utils.escapeHtml(b.resource?.name || 'Unknown')}</td>
+                <td>${Utils.formatDate(b.date)}</td>
+                <td>${b.eventCategory ? Utils.escapeHtml(b.eventCategory) : '-'}</td>
+                <td>${Utils.getStatusBadge(b.status)}</td>
+                <td>
+                    <div style="font-size:13px;">
+                        <div>Total: <strong>${Utils.formatCurrency(b.totalAmount)}</strong></div>
+                        <div>Paid: <strong class="text-success">${Utils.formatCurrency(b.totalPaid)}</strong></div>
+                        <div>Balance: <strong class="text-danger">${Utils.formatCurrency(b.balanceDue)}</strong></div>
+                    </div>
+                </td>
+                <td>${Utils.timeAgo(b.createdAt)}</td>
+                <td>
+                    <button class="btn btn-success btn-sm" onclick="App.openLogPaymentModal(${b.id}, '${Utils.escapeHtml(b.user?.name || '')}', ${b.balanceDue})">Log Cash Payment</button>
+                </td>
+            </tr>
+        `).join('');
+    },
+
+    // ---- Payment Call Modal ----
+    openPaymentCallModal(bookingId, eventCategory, resourceName) {
+        // Fee defaults per category
+        const feeDefaults = {
+            'Internal Academic':    { base: 5000,  security: 0 },
+            'Internal Non-Academic':{ base: 15000, security: 0 },
+            'Government':           { base: 20000, security: 0 },
+            'External Educational': { base: 40000, security: 20000 },
+            'Marriage':             { base: 72000, security: 20000 }
+        };
+        const defaults = feeDefaults[eventCategory] || { base: 0, security: 0 };
+
+        const backdrop = Utils.createElement(`
+            <div class="modal-backdrop active" id="payment-call-modal">
+                <div class="modal" style="max-width: 520px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title"><i class="fa-solid fa-file-invoice-dollar"></i> Issue Payment Call</h3>
+                        <button class="modal-close" onclick="document.getElementById('payment-call-modal').remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-secondary mb-4">Set the fee structure for <strong>${Utils.escapeHtml(resourceName)}</strong> — Booking <strong>#${bookingId}</strong>.</p>
+                        <div class="fee-note mb-4">
+                            <i class="fa-solid fa-circle-info"></i>
+                            Base fee for <strong>${Utils.escapeHtml(eventCategory || 'this event')}</strong> is pre-filled. Add actuals (diesel, GST, generator) to the total.
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Total Amount (₹)</label>
+                            <input type="number" id="pc-total" class="form-input" value="${defaults.base}" min="0" step="100" placeholder="e.g. 72000">
+                            <p class="form-hint">Include all charges (rental + cleaning + actuals). Exclude GST if not applicable.</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Advance Required (₹)</label>
+                            <input type="number" id="pc-advance" class="form-input" value="${defaults.security || Math.round(defaults.base * 0.3)}" min="0" step="100" placeholder="e.g. 20000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Security Deposit (₹)</label>
+                            <input type="number" id="pc-security" class="form-input" value="${defaults.security}" min="0" step="100" placeholder="e.g. 20000">
+                            <p class="form-hint">Refundable deposit (if applicable). Shown separately to the user.</p>
+                        </div>
+                        <div class="fee-preview" id="fee-preview">
+                            <div class="fee-preview-row"><span>Total Amount</span><strong id="preview-total">₹${defaults.base.toLocaleString('en-IN')}</strong></div>
+                            <div class="fee-preview-row"><span>Advance Required</span><strong id="preview-advance">₹${(defaults.security || Math.round(defaults.base * 0.3)).toLocaleString('en-IN')}</strong></div>
+                            <div class="fee-preview-row"><span>Balance Due (after advance)</span><strong id="preview-balance" class="text-danger">₹${(defaults.base - (defaults.security || Math.round(defaults.base * 0.3))).toLocaleString('en-IN')}</strong></div>
+                            <div class="fee-preview-row"><span>Security Deposit</span><strong id="preview-security">₹${defaults.security.toLocaleString('en-IN')}</strong></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="document.getElementById('payment-call-modal').remove()">Cancel</button>
+                        <button class="btn btn-primary" id="pc-submit-btn" onclick="App.submitPaymentCall(${bookingId})">
+                            <i class="fa-solid fa-paper-plane"></i> Issue Payment Call
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+        document.body.appendChild(backdrop);
+
+        // Live preview update
+        const updatePreview = () => {
+            const total = parseFloat(document.getElementById('pc-total').value) || 0;
+            const advance = parseFloat(document.getElementById('pc-advance').value) || 0;
+            const security = parseFloat(document.getElementById('pc-security').value) || 0;
+            const balance = Math.max(0, total - advance);
+            document.getElementById('preview-total').textContent = `₹${total.toLocaleString('en-IN')}`;
+            document.getElementById('preview-advance').textContent = `₹${advance.toLocaleString('en-IN')}`;
+            document.getElementById('preview-balance').textContent = `₹${balance.toLocaleString('en-IN')}`;
+            document.getElementById('preview-security').textContent = `₹${security.toLocaleString('en-IN')}`;
+        };
+        ['pc-total', 'pc-advance', 'pc-security'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', updatePreview);
         });
+    },
 
-        if (!confirmed) return;
+    async submitPaymentCall(bookingId) {
+        const totalAmount = parseFloat(document.getElementById('pc-total').value);
+        const advanceRequired = parseFloat(document.getElementById('pc-advance').value);
+        const securityDeposit = parseFloat(document.getElementById('pc-security').value) || 0;
 
-        const result = await API.updateBookingStatus(id, 'approved');
+        if (isNaN(totalAmount) || totalAmount <= 0) {
+            Notifications.error('Validation', 'Please enter a valid total amount');
+            return;
+        }
+        if (isNaN(advanceRequired) || advanceRequired < 0) {
+            Notifications.error('Validation', 'Please enter a valid advance amount');
+            return;
+        }
+
+        const btn = document.getElementById('pc-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Issuing...';
+
+        const result = await API.issuePaymentCall(bookingId, { totalAmount, advanceRequired, securityDeposit });
+        document.getElementById('payment-call-modal')?.remove();
+
         if (result.success) {
-            Notifications.success('Approved', 'Booking has been approved');
+            Notifications.success('Payment Call Issued', 'The user has been notified to visit the office with advance payment.');
             this.loadPendingApprovals();
+            this.loadAwaitingPaymentBookings();
         } else {
-            Notifications.error('Error', result.error || 'Failed to approve');
+            Notifications.error('Error', result.error || 'Failed to issue payment call');
+        }
+    },
+
+    // ---- Log Cash Payment Modal ----
+    openLogPaymentModal(bookingId, userName, balanceDue) {
+        const backdrop = Utils.createElement(`
+            <div class="modal-backdrop active" id="log-payment-modal">
+                <div class="modal" style="max-width: 460px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title"><i class="fa-solid fa-money-bill-wave"></i> Log Cash Payment</h3>
+                        <button class="modal-close" onclick="document.getElementById('log-payment-modal').remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-secondary mb-4">Recording cash received from <strong>${Utils.escapeHtml(userName)}</strong> for Booking <strong>#${bookingId}</strong>.</p>
+                        ${balanceDue > 0 ? `<div class="fee-note mb-4" style="background: var(--color-danger-50); border-color: var(--color-danger);"><i class="fa-solid fa-circle-exclamation"></i> Balance due: <strong>${Utils.formatCurrency(balanceDue)}</strong></div>` : ''}
+                        <div class="form-group">
+                            <label class="form-label required">Amount Received (₹)</label>
+                            <input type="number" id="lp-amount" class="form-input" min="1" step="100" placeholder="Enter amount received">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Payment Type</label>
+                            <select id="lp-type" class="form-select">
+                                <option value="advance">Advance Payment</option>
+                                <option value="balance">Balance Payment</option>
+                                <option value="security_refund">Security Refund</option>
+                                <option value="penalty">Penalty</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Receipt Number</label>
+                            <input type="text" id="lp-receipt" class="form-input" placeholder="e.g. REC-2026-0042" style="font-family: monospace;">
+                            <p class="form-hint">Enter the receipt number from the physical receipt book</p>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label">Notes (optional)</label>
+                            <input type="text" id="lp-notes" class="form-input" placeholder="Any additional notes...">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="document.getElementById('log-payment-modal').remove()">Cancel</button>
+                        <button class="btn btn-success" id="lp-submit-btn" onclick="App.submitCashPayment(${bookingId})">
+                            <i class="fa-solid fa-check"></i> Log Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+        document.body.appendChild(backdrop);
+        document.getElementById('lp-amount')?.focus();
+    },
+
+    async submitCashPayment(bookingId) {
+        const amountPaid = parseFloat(document.getElementById('lp-amount').value);
+        const paymentType = document.getElementById('lp-type').value;
+        const receiptNo = document.getElementById('lp-receipt').value.trim();
+        const notes = document.getElementById('lp-notes').value.trim();
+
+        if (isNaN(amountPaid) || amountPaid <= 0) {
+            Notifications.error('Validation', 'Please enter a valid amount');
+            return;
+        }
+        if (!receiptNo) {
+            Notifications.error('Validation', 'Receipt number is required');
+            return;
+        }
+
+        const btn = document.getElementById('lp-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Logging...';
+
+        const result = await API.logCashPayment(bookingId, { amountPaid, paymentType, receiptNo, notes });
+        document.getElementById('log-payment-modal')?.remove();
+
+        if (result.success) {
+            const statusLabel = result.newStatus?.replace(/_/g, ' ') || 'updated';
+            Notifications.success('Payment Logged!', `Booking is now <strong>${statusLabel}</strong>. Receipt: ${receiptNo}`);
+            this.loadPendingApprovals();
+            this.loadAwaitingPaymentBookings();
+        } else {
+            Notifications.error('Error', result.error || 'Failed to log payment');
         }
     },
 
@@ -579,13 +829,13 @@ const App = {
             confirmText: 'Reject'
         });
 
-        // User clicked cancel
         if (reason === null) return;
 
         const result = await API.updateBookingStatus(id, 'rejected', reason);
         if (result.success) {
             Notifications.success('Rejected', 'Booking has been rejected');
             this.loadPendingApprovals();
+            this.loadAwaitingPaymentBookings();
         } else {
             Notifications.error('Error', result.error || 'Failed to reject');
         }
@@ -611,6 +861,77 @@ const App = {
         } else {
             Notifications.error('Error', result.error || 'Failed to complete booking');
         }
+    },
+
+    // Payment Ledger page (admin)
+    async initPaymentLedger() {
+        if (!AUTH.requireRole('admin')) return;
+        await this.loadPaymentLedger();
+        this.setupLedgerFilters();
+    },
+
+    async loadPaymentLedger(filters = {}) {
+        const container = document.getElementById('ledger-table-body');
+        const summaryContainer = document.getElementById('ledger-summary');
+        if (!container) return;
+
+        container.innerHTML = `<tr><td colspan="9" class="text-center p-6"><div class="spinner mx-auto"></div></td></tr>`;
+
+        const result = await API.getAllPayments(filters);
+        if (!result.success) {
+            container.innerHTML = `<tr><td colspan="9" class="text-center p-6 text-danger">Failed to load payments. ${result.error || ''}</td></tr>`;
+            return;
+        }
+
+        // Update summary card
+        if (summaryContainer && result.meta) {
+            summaryContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${result.meta.total}</div>
+                    <div class="stat-label">Total Transactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value text-success">${Utils.formatCurrency(result.meta.totalReceived)}</div>
+                    <div class="stat-label">Total Cash Received</div>
+                </div>
+            `;
+        }
+
+        if (result.data.length === 0) {
+            container.innerHTML = `<tr><td colspan="9" class="text-center p-6"><div class="empty-state-icon"><i class="fa-solid fa-receipt"></i></div><p>No cash transactions found</p></td></tr>`;
+            return;
+        }
+
+        container.innerHTML = result.data.map(p => `
+            <tr>
+                <td style="font-weight:600;">#${p.booking_id}</td>
+                <td>${Utils.escapeHtml(p.resource_name || '-')}</td>
+                <td>${Utils.escapeHtml(p.booker_name || '-')}<br><span class="text-xs text-secondary">${Utils.escapeHtml(p.booker_email || '')}</span></td>
+                <td>${Utils.formatDate(p.booking_date)}</td>
+                <td>${p.event_category ? Utils.escapeHtml(p.event_category) : '-'}</td>
+                <td><strong class="text-success">${Utils.formatCurrency(p.amount_paid)}</strong></td>
+                <td><span class="badge ${p.payment_type === 'advance' ? 'badge-partial' : p.payment_type === 'balance' ? 'badge-approved' : 'badge-pending'}">${Utils.formatPaymentType(p.payment_type)}</span></td>
+                <td style="font-family:monospace;">${Utils.escapeHtml(p.receipt_no)}</td>
+                <td>${Utils.escapeHtml(p.logged_by_name || '-')}<br><span class="text-xs text-secondary">${new Date(p.created_at).toLocaleString('en-IN')}</span></td>
+            </tr>
+        `).join('');
+    },
+
+    setupLedgerFilters() {
+        const applyFilters = Utils.debounce(() => {
+            const filters = {};
+            const typeFilter = document.getElementById('ledger-type-filter')?.value;
+            const startDate = document.getElementById('ledger-start-date')?.value;
+            const endDate = document.getElementById('ledger-end-date')?.value;
+            if (typeFilter) filters.paymentType = typeFilter;
+            if (startDate) filters.startDate = startDate;
+            if (endDate) filters.endDate = endDate;
+            this.loadPaymentLedger(filters);
+        }, 300);
+
+        document.getElementById('ledger-type-filter')?.addEventListener('change', applyFilters);
+        document.getElementById('ledger-start-date')?.addEventListener('change', applyFilters);
+        document.getElementById('ledger-end-date')?.addEventListener('change', applyFilters);
     },
 
     // Calendar page

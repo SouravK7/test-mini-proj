@@ -4,7 +4,7 @@
    ============================================= */
 
 const API = {
-    // Base URL - point directly to backend for local development 
+    // Base URL - point directly to backend for local development
     baseUrl: `http://${window.location.hostname}:3000`,
 
     // Get auth token from storage (checks localStorage first, then sessionStorage)
@@ -120,8 +120,64 @@ const API = {
         });
     },
 
+    /**
+     * Issue Payment Call — Admin approves and sets fee amounts.
+     * Moves booking from 'pending_approval' → 'awaiting_advance'.
+     */
+    async issuePaymentCall(id, { totalAmount, advanceRequired, securityDeposit }) {
+        return this.request(`/api/bookings/${id}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                status: 'issue_payment_call',
+                totalAmount,
+                advanceRequired,
+                securityDeposit
+            })
+        });
+    },
+
     async cancelBooking(id) {
         return this.request(`/api/bookings/${id}`, { method: 'DELETE' });
+    },
+
+    // ============ CASH PAYMENTS ============
+    /**
+     * Log a cash payment against a booking (admin only).
+     * @param {number} bookingId
+     * @param {{ amountPaid, paymentType, receiptNo, notes }} data
+     */
+    async logCashPayment(bookingId, data) {
+        return this.request(`/api/bookings/${bookingId}/payments`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    /**
+     * Get all cash payments for a specific booking.
+     */
+    async getBookingPayments(bookingId) {
+        return this.request(`/api/bookings/${bookingId}/payments`);
+    },
+
+    /**
+     * Get all cash payments across all bookings (admin ledger).
+     */
+    async getAllPayments(filters = {}) {
+        const params = new URLSearchParams();
+        if (filters.bookingId) params.append('bookingId', filters.bookingId);
+        if (filters.paymentType) params.append('paymentType', filters.paymentType);
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+        const queryString = params.toString();
+        return this.request(`/api/payments${queryString ? '?' + queryString : ''}`);
+    },
+
+    /**
+     * Get fee defaults for event categories (admin helper).
+     */
+    async getFeeDefaults() {
+        return this.request('/api/bookings/fee-defaults');
     },
 
     // ============ AVAILABILITY ============

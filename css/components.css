@@ -834,3 +834,187 @@ select.form-select option {
         max-width: none;
     }
 }
+
+/* ====================================================
+   PAYMENT WORKFLOW — NEW COMPONENTS (v2.0)
+   ==================================================== */
+
+/* ---- New status badge colours ---- */
+.badge-awaiting-advance {
+    background: rgba(249, 115, 22, 0.12);
+    color: #f97316;
+    border-color: rgba(249, 115, 22, 0.2);
+}
+
+.badge-partial {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* ---- Visit Office Payment Banner ---- */
+.payment-visit-banner {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+    padding: var(--space-4) var(--space-5);
+    background: linear-gradient(135deg,
+        rgba(249, 115, 22, 0.08) 0%,
+        rgba(251, 191, 36, 0.06) 100%);
+    border-left: 4px solid #f97316;
+    border-bottom: 1px solid var(--border-default);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.payment-banner-icon {
+    font-size: 1.5rem;
+    color: #f97316;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.payment-banner-content {
+    flex: 1;
+    min-width: 200px;
+}
+
+.payment-banner-content strong {
+    display: block;
+    color: #c2410c;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.payment-banner-content p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.payment-summary-inline {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.psm-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    min-width: 80px;
+    text-align: center;
+}
+
+.psm-item span {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.psm-item strong {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+/* ---- Fee Note Info Box ---- */
+.fee-note {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+    padding: var(--space-3) var(--space-4);
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.fee-note i {
+    color: #3b82f6;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* ---- Fee Preview Summary in Issue Payment Call Modal ---- */
+.fee-preview {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.fee-preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border-default);
+    font-size: 0.875rem;
+}
+
+.fee-preview-row:last-child {
+    border-bottom: none;
+}
+
+.fee-preview-row span {
+    color: var(--text-secondary);
+}
+
+.fee-preview-row strong {
+    color: var(--text-primary);
+}
+
+/* ---- Overnight Slot Styling (Marriage) ---- */
+.slot-overnight {
+    border-color: #7c3aed !important;
+    background: rgba(124, 58, 237, 0.08) !important;
+}
+
+.slot-overnight.selected {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6) !important;
+    border-color: #7c3aed !important;
+    color: white !important;
+}
+
+.slot-overnight-badge {
+    font-size: 10px;
+    margin-top: 4px;
+    color: #7c3aed;
+    font-weight: 600;
+}
+
+.slot-option.selected .slot-overnight-badge {
+    color: rgba(255,255,255,0.85);
+}
+
+/* ---- Modal scrollable body ---- */
+.modal {
+    overflow-y: auto;
+}
+
+.modal-body {
+    max-height: calc(85vh - 130px);
+    overflow-y: auto;
+}
+
+/* ---- text-xs utility ---- */
+.text-xs {
+    font-size: 0.75rem;
+}
+
+/* ---- Payment banner table row ---- */
+.payment-banner-row td {
+    padding: 0 !important;
+    border-bottom: none !important;
+}

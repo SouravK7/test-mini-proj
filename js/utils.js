@@ -137,17 +137,45 @@ const Utils = {
     // Get status badge HTML
     getStatusBadge(status) {
         const statusMap = {
-            pending: { class: 'badge-pending', label: 'Pending' },
-            approved: { class: 'badge-approved', label: 'Approved' },
-            rejected: { class: 'badge-rejected', label: 'Rejected' },
-            completed: { class: 'badge-completed', label: 'Completed' },
-            cancelled: { class: 'badge-rejected', label: 'Cancelled' },
-            available: { class: 'badge-approved', label: 'Available' },
-            maintenance: { class: 'badge-pending', label: 'Maintenance' },
-            unavailable: { class: 'badge-rejected', label: 'Unavailable' }
+            // New payment workflow statuses
+            pending_approval:    { class: 'badge-pending',           label: 'Pending Approval' },
+            awaiting_advance:    { class: 'badge-awaiting-advance',  label: 'Awaiting Advance' },
+            partially_confirmed: { class: 'badge-partial',           label: 'Partially Confirmed' },
+            fully_confirmed:     { class: 'badge-approved',          label: 'Fully Confirmed' },
+            // Legacy / common statuses
+            pending:             { class: 'badge-pending',           label: 'Pending' },
+            approved:            { class: 'badge-approved',          label: 'Approved' },
+            rejected:            { class: 'badge-rejected',          label: 'Rejected' },
+            cancelled:           { class: 'badge-rejected',          label: 'Cancelled' },
+            completed:           { class: 'badge-completed',         label: 'Completed' },
+            // Resource statuses
+            available:           { class: 'badge-approved',          label: 'Available' },
+            maintenance:         { class: 'badge-pending',           label: 'Maintenance' },
+            unavailable:         { class: 'badge-rejected',          label: 'Unavailable' }
         };
-        const info = statusMap[status] || { class: '', label: status };
+        const info = statusMap[status] || { class: 'badge-pending', label: status };
         return `<span class="badge ${info.class}">${info.label}</span>`;
+    },
+
+    // Format a number as Indian Rupee currency
+    formatCurrency(amount) {
+        if (amount === null || amount === undefined) return '—';
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(parseFloat(amount));
+    },
+
+    // Format payment type label
+    formatPaymentType(type) {
+        const map = {
+            advance: 'Advance',
+            balance: 'Balance',
+            security_refund: 'Security Refund',
+            penalty: 'Penalty'
+        };
+        return map[type] || type;
     }
 };
 

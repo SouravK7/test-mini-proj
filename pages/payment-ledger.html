@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approvals | Digital Calendar for Academic Institute</title>
+    <title>Payment Ledger | Digital Calendar for Academic Institute</title>
+    <meta name="description" content="Admin view of all cash payment transactions for facility bookings.">
     <link rel="stylesheet" href="../css/variables.css">
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/components.css">
@@ -40,9 +41,9 @@
                 </div>
                 <div class="nav-section" data-role="admin">
                     <div class="nav-section-title">Approval &amp; Reports</div>
-                    <a href="approvals.html" class="nav-item active" data-role="admin"><span
+                    <a href="approvals.html" class="nav-item" data-role="admin"><span
                             class="nav-item-icon"><i class="fa-solid fa-check"></i></span>Approvals</a>
-                    <a href="payment-ledger.html" class="nav-item" data-role="admin"><span
+                    <a href="payment-ledger.html" class="nav-item active" data-role="admin"><span
                             class="nav-item-icon"><i class="fa-solid fa-receipt"></i></span>Payment Ledger</a>
                     <a href="reports.html" class="nav-item" data-role="admin"><span
                             class="nav-item-icon"><i class="fa-solid fa-chart-line"></i></span>Reports</a>
@@ -58,7 +59,7 @@
             <header class="navbar">
                 <div class="navbar-left">
                     <button class="btn btn-ghost mobile-menu-btn" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
-                    <h1 class="navbar-title">Booking Approvals</h1>
+                    <h1 class="navbar-title">Cash Payment Ledger</h1>
                 </div>
                 <div class="navbar-right">
                     <button class="theme-toggle" aria-label="Toggle theme"><span class="theme-toggle-knob"><i class="fa-solid fa-moon theme-toggle-icon theme-toggle-icon-dark"></i><i class="fa-solid fa-sun theme-toggle-icon theme-toggle-icon-light"></i></span></button>
@@ -73,65 +74,65 @@
             </header>
 
             <div class="page-content">
-
-                <!-- Section 1: Pending Approval Queue -->
                 <div class="page-header">
-                    <h2 class="page-title">Pending Approval Queue</h2>
-                    <p class="page-subtitle">Review new booking requests. Issue a payment call to confirm the booking and set fees.</p>
+                    <h2 class="page-title">Cash Payment Ledger</h2>
+                    <p class="page-subtitle">Complete history of all in-person cash transactions logged against facility bookings.</p>
                 </div>
 
-                <div class="card mb-6">
-                    <div class="card-body p-0">
-                        <div class="table-container" style="border: none;">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Requestor</th>
-                                        <th>Resource</th>
-                                        <th>Date</th>
-                                        <th>Time Slot</th>
-                                        <th>Category / Purpose</th>
-                                        <th>Submitted</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="approvals-table-body">
-                                    <tr>
-                                        <td colspan="7" class="text-center p-6">
-                                            <div class="spinner mx-auto"></div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <!-- Summary Stats -->
+                <div id="ledger-summary" class="stats-grid mb-6" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="stat-card">
+                        <div class="spinner mx-auto"></div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: flex-end;">
+                            <div class="form-group" style="margin: 0; min-width: 180px;">
+                                <label class="form-label">Payment Type</label>
+                                <select id="ledger-type-filter" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="advance">Advance</option>
+                                    <option value="balance">Balance</option>
+                                    <option value="security_refund">Security Refund</option>
+                                    <option value="penalty">Penalty</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label class="form-label">From Date</label>
+                                <input type="date" id="ledger-start-date" class="form-input">
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label class="form-label">To Date</label>
+                                <input type="date" id="ledger-end-date" class="form-input">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Section 2: Awaiting / Partially Confirmed Payment -->
-                <div class="page-header" style="margin-top: var(--space-6);">
-                    <h2 class="page-title"><i class="fa-solid fa-money-bill-wave" style="color: var(--color-success);"></i> Cash Payment Intake</h2>
-                    <p class="page-subtitle">Log cash received from users for bookings awaiting or partially confirmed payment.</p>
-                </div>
-
+                <!-- Ledger Table -->
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="table-container" style="border: none;">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Requestor</th>
-                                        <th>Resource</th>
-                                        <th>Date</th>
-                                        <th>Event Category</th>
-                                        <th>Status</th>
-                                        <th>Financials</th>
-                                        <th>Submitted</th>
-                                        <th>Action</th>
+                                        <th>Booking #</th>
+                                        <th>Facility</th>
+                                        <th>Booked By</th>
+                                        <th>Event Date</th>
+                                        <th>Category</th>
+                                        <th>Amount Paid</th>
+                                        <th>Type</th>
+                                        <th>Receipt No.</th>
+                                        <th>Logged By</th>
                                     </tr>
                                 </thead>
-                                <tbody id="awaiting-payment-table-body">
+                                <tbody id="ledger-table-body">
                                     <tr>
-                                        <td colspan="8" class="text-center p-6">
+                                        <td colspan="9" class="text-center p-6">
                                             <div class="spinner mx-auto"></div>
                                         </td>
                                     </tr>
@@ -140,7 +141,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
