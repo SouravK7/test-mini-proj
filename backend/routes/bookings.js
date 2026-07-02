@@ -78,6 +78,9 @@ function transformBooking(row) {
         rejectedBy: row.rejected_by,
         rejectedAt: row.rejected_at,
         rejectionReason: row.rejection_reason,
+        actualsAmount: row.actuals_amount,
+        penaltyAmount: row.penalty_amount,
+        settlementNotes: row.settlement_notes,
         hasUsageRecord: row.has_usage_record === true || row.has_usage_record === 'true',
         gdriveLink: row.gdrive_link,
         resource: {
@@ -400,7 +403,7 @@ router.put('/:id/status', authenticate, async (req, res, next) => {
             const total = parseFloat(totalAmount);
             const advance = parseFloat(advanceRequired) || 0;
             const security = parseFloat(securityDeposit) || 0;
-            const balance = total - advance;
+            const balance = total + security;
 
             sql = `
                 UPDATE bookings
@@ -666,6 +669,49 @@ router.get('/availability/:resourceId/:date', optionalAuth, async (req, res, nex
             });
 
         res.json({ success: true, data: slots });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ============================================
+// PUT /api/bookings/:id/settle - Post-Event Settlement
+// ============================================
+router.put('/:id/settle', authenticate, authorize('admin'), async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { actualsAmount, penaltyAmount, settlementNotes } = req.body;
+
+        const bookingResult = await query('SELECT * FROM bookings WHERE id = $1', [id]);
+        if (bookingResult.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Booking not found' });
+        }
+
+        const booking = bookingResult.rows[0];
+
+        // Status must be fully_confirmed to settle
+        if (booking.status !== 'fully_confirmed' && booking.status !== 'completed') {
+            return res.status(400).json({ success: false, error: 'Booking must be fully confirmed before settlement.' });
+        }
+
+        const actuals = parseFloat(actualsAmount) || 0;
+        const penalty = parseFloat(penaltyAmount) || 0;
+        
+        // Update the booking with settlement details and mark as completed
+        const sql = `
+            UPDATE bookings
+            SET actuals_amount = $1,
+                penalty_amount = $2,
+                settlement_notes = $3,
+                status = 'completed',
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $4
+            RETURNING *
+        `;
+        
+        const result = await query(sql, [actuals, penalty, settlementNotes || null, id]);
+
+        res.json({ success: true, data: result.rows[0] });
     } catch (error) {
         next(error);
     }
