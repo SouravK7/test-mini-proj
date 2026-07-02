@@ -457,7 +457,9 @@ const App = {
             // Payment summary panel for auditorium bookings with financial data
             const hasPaymentData = b.totalAmount && parseFloat(b.totalAmount) > 0;
             const paymentWarningStatuses = ['awaiting_advance', 'partially_confirmed'];
-            const isPaymentPending = paymentWarningStatuses.includes(b.status);
+            const isAwaitingAdvance = b.status === 'awaiting_advance';
+            const isPartiallyConfirmed = b.status === 'partially_confirmed';
+            const isPaymentPending = isAwaitingAdvance || isPartiallyConfirmed;
 
             const paymentBanner = isPaymentPending ? `
                 <tr class="payment-banner-row">
@@ -465,15 +467,22 @@ const App = {
                         <div class="payment-visit-banner">
                             <div class="payment-banner-icon"><i class="fa-solid fa-building-columns"></i></div>
                             <div class="payment-banner-content">
-                                <strong>Action Required: In-Person Cash Payment</strong>
-                                <p>Please visit the <strong>College Administrative Office</strong> during working hours (9 AM – 5 PM) with your ID proof and booking reference <strong>#${b.id}</strong> to pay the required cash amount.</p>
+                                <strong>Action Required: ${isAwaitingAdvance ? 'Advance Payment to Confirm Booking' : 'Final Balance Payment'}</strong>
+                                <p>Please visit the <strong>College Administrative Office</strong> during working hours (9 AM – 5 PM) with your ID proof and booking reference <strong>#${b.id}</strong>.</p>
+                                ${isAwaitingAdvance ? `<p class="text-sm mt-1" style="opacity: 0.9;">*Note: A 50% booking advance plus the full refundable security deposit must be paid to confirm this reservation.</p>` : ''}
                             </div>
                             ${hasPaymentData ? `
                             <div class="payment-summary-inline">
-                                <div class="psm-item"><span>Total</span><strong>${Utils.formatCurrency(b.totalAmount)}</strong></div>
-                                <div class="psm-item"><span>Advance Paid</span><strong class="text-success">${Utils.formatCurrency(b.totalPaid)}</strong></div>
-                                <div class="psm-item"><span>Balance Due</span><strong class="text-danger">${Utils.formatCurrency(b.balanceDue)}</strong></div>
-                                ${b.securityDeposit && parseFloat(b.securityDeposit) > 0 ? `<div class="psm-item"><span>Security Deposit</span><strong>${Utils.formatCurrency(b.securityDeposit)}</strong></div>` : ''}
+                                <div class="psm-item"><span>Event Rental</span><strong>${Utils.formatCurrency(b.totalAmount)}</strong></div>
+                                ${b.securityDeposit && parseFloat(b.securityDeposit) > 0 ? `<div class="psm-item"><span>Security Deposit</span><strong>${Utils.formatCurrency(b.securityDeposit)} (Refundable)</strong></div>` : ''}
+                                <div class="psm-item"><span>Booking Subtotal</span><strong>${Utils.formatCurrency(parseFloat(b.totalAmount || 0) + parseFloat(b.securityDeposit || 0))}</strong></div>
+                                ${isAwaitingAdvance ? `
+                                <div class="psm-item"><span>Due Now (To Confirm)</span><strong class="text-danger">${Utils.formatCurrency(parseFloat(b.advanceRequired || 0) + parseFloat(b.securityDeposit || 0))}</strong></div>
+                                <div class="psm-item"><span>Due Later (Balance)</span><strong>${Utils.formatCurrency(parseFloat(b.totalAmount || 0) - parseFloat(b.advanceRequired || 0))}</strong></div>
+                                ` : `
+                                <div class="psm-item"><span>Paid So Far</span><strong class="text-success">${Utils.formatCurrency(b.totalPaid || 0)}</strong></div>
+                                <div class="psm-item"><span>Due Now (Balance)</span><strong class="text-danger">${Utils.formatCurrency(b.balanceDue)}</strong></div>
+                                `}
                             </div>` : ''}
                         </div>
                     </td>
@@ -502,7 +511,7 @@ const App = {
                 <td>
                     ${['pending_approval', 'pending'].includes(b.status) ? `<button class="btn btn-ghost btn-sm" onclick="App.cancelBooking(${b.id})">Cancel</button>` : ''}
                     ${b.status === 'awaiting_advance' ? `<button class="btn btn-ghost btn-sm" onclick="App.cancelBooking(${b.id})">Cancel</button>` : ''}
-                    ${b.status === 'fully_confirmed' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
+                    ${b.status === 'fully_confirmed' ? `<button class="btn btn-primary btn-sm" onclick="App.openPostEventSettlementModal(${b.id}, ${b.securityDeposit || 0})">Settle Event</button>` : ''}
                     ${b.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="App.completeBooking(${b.id})">Mark Completed</button>` : ''}
                 </td>
             </tr>
@@ -625,7 +634,7 @@ const App = {
                 <td>${Utils.getStatusBadge(b.status)}</td>
                 <td>
                     <div style="font-size:13px;">
-                        <div>Total: <strong>${Utils.formatCurrency(b.totalAmount)}</strong></div>
+                        <div>Subtotal: <strong>${Utils.formatCurrency(parseFloat(b.totalAmount || 0) + parseFloat(b.securityDeposit || 0))}</strong></div>
                         <div>Paid: <strong class="text-success">${Utils.formatCurrency(b.totalPaid)}</strong></div>
                         <div>Balance: <strong class="text-danger">${Utils.formatCurrency(b.balanceDue)}</strong></div>
                     </div>
@@ -664,24 +673,25 @@ const App = {
                             Base fee for <strong>${Utils.escapeHtml(eventCategory || 'this event')}</strong> is pre-filled. Add actuals (diesel, GST, generator) to the total.
                         </div>
                         <div class="form-group">
-                            <label class="form-label required">Total Amount (₹)</label>
+                            <label class="form-label required">Event Rental (₹)</label>
                             <input type="number" id="pc-total" class="form-input" value="${defaults.base}" min="0" step="100" placeholder="e.g. 72000">
-                            <p class="form-hint">Include all charges (rental + cleaning + actuals). Exclude GST if not applicable.</p>
+                            <p class="form-hint">Non-refundable charges (rental + cleaning + actuals). Exclude Security Deposit.</p>
                         </div>
                         <div class="form-group">
-                            <label class="form-label required">Advance Required (₹)</label>
-                            <input type="number" id="pc-advance" class="form-input" value="${defaults.security || Math.round(defaults.base * 0.3)}" min="0" step="100" placeholder="e.g. 20000">
+                            <label class="form-label required">Booking Advance (₹)</label>
+                            <input type="number" id="pc-advance" class="form-input" value="${Math.round(defaults.base * 0.5)}" min="0" step="100" placeholder="e.g. 36000">
+                            <p class="form-hint">50% of the rental amount required to lock the date.</p>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Security Deposit (₹)</label>
                             <input type="number" id="pc-security" class="form-input" value="${defaults.security}" min="0" step="100" placeholder="e.g. 20000">
-                            <p class="form-hint">Refundable deposit (if applicable). Shown separately to the user.</p>
+                            <p class="form-hint">Refundable deposit. Will be collected upfront.</p>
                         </div>
                         <div class="fee-preview" id="fee-preview">
-                            <div class="fee-preview-row"><span>Total Amount</span><strong id="preview-total">₹${defaults.base.toLocaleString('en-IN')}</strong></div>
-                            <div class="fee-preview-row"><span>Advance Required</span><strong id="preview-advance">₹${(defaults.security || Math.round(defaults.base * 0.3)).toLocaleString('en-IN')}</strong></div>
-                            <div class="fee-preview-row"><span>Balance Due (after advance)</span><strong id="preview-balance" class="text-danger">₹${(defaults.base - (defaults.security || Math.round(defaults.base * 0.3))).toLocaleString('en-IN')}</strong></div>
+                            <div class="fee-preview-row"><span>Event Rental</span><strong id="preview-total">₹${defaults.base.toLocaleString('en-IN')}</strong></div>
                             <div class="fee-preview-row"><span>Security Deposit</span><strong id="preview-security">₹${defaults.security.toLocaleString('en-IN')}</strong></div>
+                            <div class="fee-preview-row"><span>Due Now (Advance + Security)</span><strong id="preview-due-now" class="text-danger">₹${(Math.round(defaults.base * 0.5) + defaults.security).toLocaleString('en-IN')}</strong></div>
+                            <div class="fee-preview-row"><span>Due Later (Balance)</span><strong id="preview-balance">₹${(defaults.base - Math.round(defaults.base * 0.5)).toLocaleString('en-IN')}</strong></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -701,10 +711,12 @@ const App = {
             const advance = parseFloat(document.getElementById('pc-advance').value) || 0;
             const security = parseFloat(document.getElementById('pc-security').value) || 0;
             const balance = Math.max(0, total - advance);
+            const dueNow = advance + security;
+            
             document.getElementById('preview-total').textContent = `₹${total.toLocaleString('en-IN')}`;
-            document.getElementById('preview-advance').textContent = `₹${advance.toLocaleString('en-IN')}`;
-            document.getElementById('preview-balance').textContent = `₹${balance.toLocaleString('en-IN')}`;
             document.getElementById('preview-security').textContent = `₹${security.toLocaleString('en-IN')}`;
+            document.getElementById('preview-due-now').textContent = `₹${dueNow.toLocaleString('en-IN')}`;
+            document.getElementById('preview-balance').textContent = `₹${balance.toLocaleString('en-IN')}`;
         };
         ['pc-total', 'pc-advance', 'pc-security'].forEach(id => {
             document.getElementById(id)?.addEventListener('input', updatePreview);
@@ -860,6 +872,107 @@ const App = {
             }
         } else {
             Notifications.error('Error', result.error || 'Failed to complete booking');
+        }
+    },
+
+    openPostEventSettlementModal(bookingId, securityDeposit = 0) {
+        const backdrop = Utils.createElement(`
+            <div class="modal-backdrop active" id="settlement-modal">
+                <div class="modal" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title"><i class="fa-solid fa-file-invoice-dollar"></i> Post-Event Settlement</h3>
+                        <button class="modal-close" onclick="document.getElementById('settlement-modal').remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-secondary mb-4">Finalize billing for Booking <strong>#${bookingId}</strong>.</p>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Extra Actuals (Diesel/Electricity) (₹)</label>
+                            <input type="number" id="settle-actuals" class="form-input" value="0" min="0" step="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Damages / Penalties (₹)</label>
+                            <input type="number" id="settle-penalty" class="form-input" value="0" min="0" step="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Settlement Note</label>
+                            <textarea id="settle-notes" class="form-input" rows="2" placeholder="e.g. 5 hours extra diesel, chair damaged"></textarea>
+                        </div>
+                        
+                        <div class="fee-preview">
+                            <div class="fee-preview-row"><span>Original Security Deposit</span><strong>₹${securityDeposit.toLocaleString('en-IN')}</strong></div>
+                            <div class="fee-preview-row"><span>Deductions</span><strong class="text-danger" id="settle-deductions">₹0</strong></div>
+                            <div class="fee-preview-row"><span id="settle-refund-label">Final Refund Due</span><strong id="settle-refund" class="text-success">₹${securityDeposit.toLocaleString('en-IN')}</strong></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="document.getElementById('settlement-modal').remove()">Cancel</button>
+                        <button class="btn btn-primary" onclick="App.submitSettlement(${bookingId}, ${securityDeposit})">
+                            <i class="fa-solid fa-check-double"></i> Complete & Settle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+        document.body.appendChild(backdrop);
+
+        const updateSettlementPreview = () => {
+            const actuals = parseFloat(document.getElementById('settle-actuals').value) || 0;
+            const penalty = parseFloat(document.getElementById('settle-penalty').value) || 0;
+            const deductions = actuals + penalty;
+            const refund = securityDeposit - deductions;
+            
+            document.getElementById('settle-deductions').textContent = `₹${deductions.toLocaleString('en-IN')}`;
+            const refundEl = document.getElementById('settle-refund');
+            const refundLabel = document.getElementById('settle-refund-label');
+            
+            if (refund < 0) {
+                refundEl.className = 'text-danger';
+                refundLabel.textContent = 'Balance Due from User';
+                refundEl.textContent = `₹${Math.abs(refund).toLocaleString('en-IN')}`;
+            } else {
+                refundEl.className = 'text-success';
+                refundLabel.textContent = 'Final Refund Due';
+                refundEl.textContent = `₹${refund.toLocaleString('en-IN')}`;
+            }
+        };
+
+        ['settle-actuals', 'settle-penalty'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateSettlementPreview);
+        });
+    },
+
+    async submitSettlement(bookingId, securityDeposit) {
+        const actualsAmount = parseFloat(document.getElementById('settle-actuals').value) || 0;
+        const penaltyAmount = parseFloat(document.getElementById('settle-penalty').value) || 0;
+        const settlementNotes = document.getElementById('settle-notes').value.trim();
+
+        try {
+            const res = await fetch(`/api/bookings/${bookingId}/settle`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ actualsAmount, penaltyAmount, settlementNotes })
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                Notifications.success('Settled', 'Booking successfully settled and completed');
+                document.getElementById('settlement-modal').remove();
+                if (this.getCurrentPage() === 'my-bookings') {
+                    this.loadMyBookings();
+                } else if (this.getCurrentPage() === 'reports') {
+                    this.loadReportsData();
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                Notifications.error('Settlement Failed', result.error);
+            }
+        } catch (error) {
+            Notifications.error('Network Error', error.message);
         }
     },
 
@@ -1298,6 +1411,29 @@ const App = {
                     <div class="detail-group sm-col-span-2 mt-2">
                         <div class="detail-label">Rejection Reason</div>
                         <div class="detail-value text-danger">${Utils.escapeHtml(booking.rejectionReason || 'No reason provided')}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Add settlement details if completed
+        if (booking.status === 'completed' && (booking.actualsAmount > 0 || booking.penaltyAmount > 0 || booking.settlementNotes)) {
+            const settlementCard = clone.getElementById('settlement-details-card');
+            const settlementContent = clone.getElementById('settlement-details-content');
+            if (settlementCard && settlementContent) {
+                settlementCard.style.display = 'block';
+                settlementContent.innerHTML = `
+                    <div class="detail-group">
+                        <div class="detail-label">Actuals & Extra Charges</div>
+                        <div class="detail-value text-danger">₹${(booking.actualsAmount || 0).toLocaleString('en-IN')}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Damages / Penalties</div>
+                        <div class="detail-value text-danger">₹${(booking.penaltyAmount || 0).toLocaleString('en-IN')}</div>
+                    </div>
+                    <div class="detail-group sm-col-span-2 mt-2">
+                        <div class="detail-label">Settlement Note</div>
+                        <div class="detail-value">${Utils.escapeHtml(booking.settlementNotes || 'No notes provided')}</div>
                     </div>
                 `;
             }
