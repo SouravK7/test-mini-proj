@@ -146,6 +146,11 @@ CREATE TABLE bookings (
     security_deposit    DECIMAL(12,2)   NULL,
     balance_due         DECIMAL(12,2)   NULL,
 
+    -- Post-event settlement tracking
+    actuals_amount      DECIMAL(12,2)   NULL,
+    penalty_amount      DECIMAL(12,2)   NULL,
+    settlement_notes    TEXT            NULL,
+
     -- Admin action tracking
     approved_by         INT             NULL REFERENCES users(id) ON DELETE SET NULL,
     approved_at         TIMESTAMP       NULL,
