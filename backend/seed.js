@@ -124,11 +124,13 @@ async function seed() {
                 resource_id, user_id, slot_id, booking_date, purpose, 
                 event_category, event_metadata, status, 
                 total_amount, advance_required, security_deposit, balance_due,
+                actuals_amount, penalty_amount, settlement_notes,
                 approved_by, approved_at
             ) VALUES (
                 $1, $2, $3, CURRENT_DATE + INTERVAL '14 days', 'Marriage Function of Sister',
                 'Marriage', '{"bride_name": "Anjali Sharma", "groom_name": "Amit Verma"}'::jsonb, 'partially_confirmed',
-                50000.00, 15000.00, 10000.00, 35000.00,
+                50000.00, 25000.00, 20000.00, 25000.00,
+                0, 0, NULL,
                 $4, CURRENT_TIMESTAMP
             ) RETURNING id;
         `, [auditoriumId, userMap['public@gmail.com'], marriageSlotId, userMap['admin@coet.edu']]);
@@ -139,7 +141,7 @@ async function seed() {
     await client.query(`
             INSERT INTO cash_payments (booking_id, logged_by, amount_paid, payment_type, receipt_no, notes)
             VALUES (
-                $1, $2, 15000.00, 'advance', 'REC-2026-0001', 'Initial advance booking deposit collected in cash at window 3.'
+                $1, $2, 45000.00, 'advance', 'REC-2026-0001', '50% Booking Advance + Security Deposit collected in cash at window 3.'
             );
         `, [bookingId, userMap['admin@coet.edu']]);
 
