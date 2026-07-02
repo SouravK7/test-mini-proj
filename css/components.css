@@ -1000,12 +1000,15 @@ select.form-select option {
 
 /* ---- Modal scrollable body ---- */
 .modal {
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .modal-body {
-    max-height: calc(85vh - 130px);
     overflow-y: auto;
+    flex: 1 1 auto;
+    max-height: none;
 }
 
 /* ---- text-xs utility ---- */
